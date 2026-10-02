@@ -1,0 +1,28 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+
+# Node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+appsettings.Development.local.json
+
+# Uploads (local photo storage)
+backend/src/GeiRanking.Api/uploads/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.claude/settings.local.json
