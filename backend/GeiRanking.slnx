@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GeiRanking.Api/GeiRanking.Api.csproj" />
+    <Project Path="src/GeiRanking.Domain/GeiRanking.Domain.csproj" />
+    <Project Path="src/GeiRanking.Infrastructure/GeiRanking.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GeiRanking.Api.Tests/GeiRanking.Api.Tests.csproj" />
+    <Project Path="tests/GeiRanking.Domain.Tests/GeiRanking.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
