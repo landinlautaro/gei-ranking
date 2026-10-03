@@ -72,7 +72,7 @@ docker exec -i gei-ranking-db psql -v ON_ERROR_STOP=1 -U gei -d gei_ranking < ba
 # Neon (usar la cadena de conexión de Neon, con SSL)
 psql "postgresql://usuario:clave@<endpoint>.neon.tech/<base>?sslmode=require" -v ON_ERROR_STOP=1 -f backend/db/seed/001_initial_players.sql
 ```
-La fecha de ingreso y del evento inicial es `2026-01-01` (variable `initial_at` al principio del script); todo partido real debe tener fecha posterior.
+La fecha de ingreso y del evento inicial es el `01/01/2026` (medianoche en hora del club) (variable `initial_at` al principio del script); todo partido real debe tener fecha posterior.
 
 ### Partidos de prueba (solo desarrollo)
 `backend/db/seed/dev/900_dev_sample_matches.sql` carga 11 partidos de ejemplo (incluye un W.O., un abandono y un partido anulado) para tener datos en la API. **Nunca correrlo en producción**: el script se niega a ejecutarse si la base no se llama `gei_ranking`. Después de cargarlo hay que regenerar el ranking:

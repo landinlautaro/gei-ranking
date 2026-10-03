@@ -11,7 +11,7 @@ BEGIN;
 
 DO $seed$
 DECLARE
-    initial_at timestamptz := '2026-01-01 00:00:00+00';   -- INITIAL_AT: join date and date of the InitialRanking event
+    initial_at timestamptz := '2026-01-01 03:00:00+00';   -- INITIAL_AT: 01/01/2026 00:00 club time (UTC-3); join date and date of the InitialRanking event
     initial_event_id bigint;
     order_ids integer[];
 BEGIN
