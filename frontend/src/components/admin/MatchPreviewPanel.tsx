@@ -59,7 +59,7 @@ export function MatchPreviewPanel({ preview, loading, failed, winnerName }: Prop
 
         {preview.requiresOutOfRangeConfirmation && (
           <Notice tone="warning">
-            <strong>Fuera de rango.</strong> {messageForCode('OutOfRange')} Se puede guardar igual, pero hay que confirmarlo.
+            <strong>Fuera de rango:</strong> el desafío es de más de 5 puestos o hacia abajo. Se puede guardar igual, pero hay que confirmarlo.
           </Notice>
         )}
 

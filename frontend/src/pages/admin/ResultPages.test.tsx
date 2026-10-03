@@ -184,7 +184,7 @@ describe('Cargar resultado', () => {
     renderApp('/admin/results/new')
     await fillNormalMatch()
 
-    expect(await screen.findByText(/Fuera de rango\./)).toBeInTheDocument()
+    expect(await screen.findByText(/Fuera de rango:/)).toBeInTheDocument()
     const save = screen.getByRole('button', { name: 'Guardar resultado' })
     expect(save).toBeDisabled()
 

@@ -40,7 +40,7 @@ export function AdminLayout() {
           <NavLink to="/admin/results/new" className={navClass}>Cargar resultado</NavLink>
           <NavLink to="/admin/matches" className={navClass}>Partidos</NavLink>
           <NavLink to="/admin/players" className={navClass}>Jugadores</NavLink>
-          <NavLink to="/admin/adjustments" className={navClass}>Ajuste de posición</NavLink>
+          <NavLink to="/admin/adjustments" className={navClass}>Ajustes</NavLink>
         </nav>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">

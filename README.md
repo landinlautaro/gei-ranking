@@ -137,3 +137,17 @@ El login tiene límite de intentos (10 por minuto por IP, configurable con `Rate
 | `POST /api/admin/ranking/adjustments` | Mueve a un jugador a otra posición. El motivo es obligatorio. |
 
 Las fotos viven detrás de `IPhotoStorage` (hoy `LocalPhotoStorage`, en disco): para pasar a un servicio de archivos alcanza con otra implementación.
+
+## Administración en la web (Fase 5)
+Entrar a `http://localhost:5173/admin` (hay un enlace "Administración" al pie del sitio público). Hace falta haber creado el administrador con `seed-admin` (ver más arriba). La sesión se guarda en el navegador (`localStorage`) hasta que vence el token (8 horas) o se toca **Salir**; si la API rechaza el token, se cierra sola y avisa.
+
+| Pantalla | Qué permite |
+| --- | --- |
+| **Cargar resultado** (`/admin/results/new`) | Elegir desafiante y desafiado (con su posición actual y el rango permitido), fecha, cómo terminó (jugado, W.O., abandono), score set por set y observaciones. La validación es en vivo: los sets inválidos se marcan al escribir, el tie-break y el Super Tie-Break aparecen solo cuando corresponden, y la **vista previa** (que consulta a la API sin guardar) muestra el ganador, el movimiento exacto y si algún partido posterior quedaría fuera de rango. Un desafío fuera de rango se guarda solo después de confirmarlo. |
+| **Partidos** (`/admin/matches`) | Listado con filtros (jugador, estado, fechas, solo con advertencias; quedan en la URL), edición y anulación con confirmación. Los partidos que quedan fuera de rango tras un cambio se marcan, no se bloquean. |
+| **Jugadores** (`/admin/players`) | Alta (al final o en una posición), edición de datos, foto (JPEG/PNG/WebP hasta 5 MB), baja lógica y reingreso. |
+| **Ajustes** (`/admin/adjustments`) | Mover a un jugador a otra posición con motivo obligatorio. |
+
+La fecha de un partido se guarda al mediodía en hora del club (UTC-3 fijo, sin horario de verano). Al editar un partido sin cambiar la fecha se conserva la hora original. Los mensajes de error de la API se traducen en `frontend/src/lib/errors.ts` a partir de sus códigos estables.
+
+En desarrollo Vite reenvía `/api` y `/photos` a la API. Los tests de la interfaz (`npm test --prefix frontend`) usan una API simulada; además se verificó el recorrido completo contra la API real con un navegador (login, carga con vista previa, anulación, fuera de rango, edición, foto, baja, ajuste y sesión vencida).
