@@ -29,7 +29,9 @@ npm install        # solo la primera vez
 npm run dev
 ```
 
-El frontend llama a `/api/...` y Vite reenvía esos pedidos al backend (`vite.config.ts`), así que en desarrollo no hace falta CORS. La home muestra el resultado de `GET /api/health`.
+El frontend llama a `/api/...` y Vite reenvía esos pedidos al backend (`vite.config.ts`), así que en desarrollo no hace falta CORS.
+
+Para ver datos: cargar los seeds (ver [Base de datos](#base-de-datos)). Páginas públicas: `/` (ranking con buscador), `/players/:id` (perfil) y `/matches` (partidos con filtros por jugador y fechas, guardados en la URL).
 
 ### Configuración
 En desarrollo, `backend/src/GeiRanking.Api/appsettings.Development.json` ya apunta al PostgreSQL de Docker (credenciales descartables de desarrollo). Cualquier valor se puede pisar con variables de entorno (ver [`.env.example`](.env.example)):

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { PlayerRef } from '../api/types'
 import { avatarUri } from '../lib/avatar'
 
-const sizes = { sm: 'size-8', md: 'size-10', lg: 'size-24' } as const
+const sizes = { sm: 'size-8', md: 'size-8 sm:size-10', lg: 'size-24' } as const
 
 interface AvatarProps {
   player: Pick<PlayerRef, 'id' | 'photoPath'>

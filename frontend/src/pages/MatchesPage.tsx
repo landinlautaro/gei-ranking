@@ -53,13 +53,15 @@ export function MatchesPage() {
             ))}
           </select>
         </div>
-        <div>
-          <label htmlFor="from" className="mb-1 block text-sm font-medium text-slate-700">Desde</label>
-          <input id="from" type="date" value={from} max={to || undefined} onChange={(e) => update({ from: e.target.value })} className={fieldClass} />
-        </div>
-        <div>
-          <label htmlFor="to" className="mb-1 block text-sm font-medium text-slate-700">Hasta</label>
-          <input id="to" type="date" value={to} min={from || undefined} onChange={(e) => update({ to: e.target.value })} className={fieldClass} />
+        <div className="grid grid-cols-2 gap-3 sm:contents">
+          <div>
+            <label htmlFor="from" className="mb-1 block text-sm font-medium text-slate-700">Desde</label>
+            <input id="from" type="date" value={from} max={to || undefined} onChange={(e) => update({ from: e.target.value })} className={fieldClass} />
+          </div>
+          <div>
+            <label htmlFor="to" className="mb-1 block text-sm font-medium text-slate-700">Hasta</label>
+            <input id="to" type="date" value={to} min={from || undefined} onChange={(e) => update({ to: e.target.value })} className={fieldClass} />
+          </div>
         </div>
         {hasFilters && (
           <button
