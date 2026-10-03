@@ -2,16 +2,30 @@ using System.Text.Json.Serialization;
 using GeiRanking.Api.Admin;
 using GeiRanking.Api.Auth;
 using GeiRanking.Api.Endpoints;
+using GeiRanking.Api.Hosting;
 using GeiRanking.Domain.Admin;
 using GeiRanking.Infrastructure;
 using GeiRanking.Infrastructure.Persistence;
 using GeiRanking.Infrastructure.Storage;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Outside development, logs are one JSON object per line (what hosting platforms collect and search).
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Logging.ClearProviders();
+    builder.Logging.AddJsonConsole(options =>
+    {
+        options.IncludeScopes = true;
+        options.UseUtcTimestamp = true;
+        options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
+    });
+}
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAdminAuth(builder.Configuration, builder.Environment);
@@ -49,9 +63,22 @@ builder.Services.AddScoped<MatchAdminService>();
 
 var app = builder.Build();
 
-// Explicit maintenance commands (like migrations, never run on startup):
-//   dotnet run --project backend/src/GeiRanking.Api -- rebuild-ranking
-//   dotnet run --project backend/src/GeiRanking.Api -- seed-admin     (needs Admin__Username and Admin__Password)
+// Explicit maintenance commands (nothing here ever runs on startup). The same commands work from the Docker image:
+//   dotnet GeiRanking.Api.dll migrate          applies pending EF Core migrations
+//   dotnet GeiRanking.Api.dll seed-admin       creates the first admin (needs Admin__Username and Admin__Password)
+//   dotnet GeiRanking.Api.dll rebuild-ranking  regenerates the ranking from the events
+if (args.Contains("migrate"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+    await db.Database.MigrateAsync();
+    Console.WriteLine(pending.Count == 0
+        ? "Database is up to date: no pending migrations."
+        : $"Applied {pending.Count} migration(s): {string.Join(", ", pending)}.");
+    return;
+}
+
 if (args.Contains("rebuild-ranking"))
 {
     using var scope = app.Services.CreateScope();
@@ -79,6 +106,13 @@ if (app.Services.GetRequiredService<IOptions<JwtSettings>>().Value.SecretIsEphem
 }
 
 app.UseExceptionHandler();
+app.UseSecurityHeaders(app.Environment);
+if (!app.Environment.IsDevelopment())
+{
+    // TLS ends at the platform's proxy; this tells browsers to keep using HTTPS.
+    app.UseHsts();
+}
+
 app.UseCors();
 
 Directory.CreateDirectory(photosDirectory);
@@ -86,15 +120,20 @@ app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(photosDirectory),
     RequestPath = storage.RequestPath,
+    // File names are unique per upload (a new photo is a new name), so browsers and CDNs can keep them for good.
+    OnPrepareResponse = context => context.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable",
 });
 
 app.UseAuthentication();
+app.UseAdminLogScope();
+app.UseRequestLogging();
 app.UseAuthorization();
 app.UseRateLimiter();
 
-app.MapOpenApi();
+// The API description (and Swagger UI) is a development tool, not something to publish.
 if (app.Environment.IsDevelopment())
 {
+    app.MapOpenApi();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "GEI Ranking API v1"));
 }
 

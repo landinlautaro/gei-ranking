@@ -36,6 +36,15 @@ public sealed class PostgresFixture : IAsyncLifetime
             .UseSnakeCaseNamingConvention()
             .Options);
 
+    /// <summary>A brand new, completely empty database (no tables, no migrations applied). The caller drops it with the returned action.</summary>
+    public async Task<(string ConnectionString, Func<Task> Drop)> CreateEmptyDatabaseAsync()
+    {
+        var name = $"gei_test_{Guid.NewGuid():N}";
+        await ExecuteAdminAsync($"CREATE DATABASE \"{name}\"");
+        var connectionString = new NpgsqlConnectionStringBuilder(_adminConnectionString) { Database = name, Pooling = false }.ConnectionString;
+        return (connectionString, () => ExecuteAdminAsync($"DROP DATABASE IF EXISTS \"{name}\" WITH (FORCE)"));
+    }
+
     /// <summary>Empties every table so each test starts from nothing.</summary>
     public async Task ResetAsync()
     {

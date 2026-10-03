@@ -173,6 +173,7 @@ public static class AdminEndpoints
         AppDbContext db,
         RankingService ranking,
         TimeProvider clock,
+        ILoggerFactory loggers,
         CancellationToken ct)
     {
         var errors = new Dictionary<string, string[]>();
@@ -228,6 +229,8 @@ public static class AdminEndpoints
             await context.SaveChangesAsync(token);
         }, ct);
 
+        loggers.CreateLogger("GeiRanking.Audit").LogInformation(
+            "Manual adjustment: player {PlayerId} moved from {From} to {To}. Reason: {Reason}", request.PlayerId, current.Value, request.NewPosition, reason);
         return TypedResults.Ok(new ManualAdjustmentResultDto(request.PlayerId, current.Value, request.NewPosition));
     }
 }

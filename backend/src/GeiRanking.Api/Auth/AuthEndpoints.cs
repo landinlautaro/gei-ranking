@@ -33,13 +33,19 @@ public static class AuthEndpoints
             .WithSummary("The logged in admin; handy to check that a token is still valid.");
     }
 
+    /// <summary>User-typed text goes into logs: no line breaks (log forging) and a bounded length.</summary>
+    private static string Sanitize(string value) =>
+        new string(value.Where(c => !char.IsControl(c)).Take(60).ToArray());
+
     private static async Task<Results<Ok<LoginResponse>, ProblemHttpResult>> Login(
         LoginRequest request,
         AppDbContext db,
         IPasswordHasher<AdminUser> hasher,
         JwtTokenService tokens,
+        ILoggerFactory loggers,
         CancellationToken ct)
     {
+        var logger = loggers.CreateLogger("GeiRanking.Auth");
         var username = AdminUser.NormalizeUsername(request.Username ?? string.Empty);
         var password = request.Password ?? string.Empty;
 
@@ -48,6 +54,7 @@ public static class AuthEndpoints
 
         if (user is null || result == PasswordVerificationResult.Failed)
         {
+            logger.LogWarning("Failed admin login for user {Username}", Sanitize(username));
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status401Unauthorized,
                 title: "Invalid credentials",
@@ -62,6 +69,7 @@ public static class AuthEndpoints
         }
 
         var (token, expiresAt) = tokens.Create(user);
+        logger.LogInformation("Admin {Username} logged in", user.Username);
         return TypedResults.Ok(new LoginResponse(token, expiresAt, user.Username));
     }
 }

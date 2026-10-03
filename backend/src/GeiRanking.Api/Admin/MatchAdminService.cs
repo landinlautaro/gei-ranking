@@ -11,7 +11,7 @@ namespace GeiRanking.Api.Admin;
 /// Create, edit, void and preview matches. Every write goes through <see cref="RankingService.ExecuteAsync"/>, so the match,
 /// its ranking event and the full recalculation commit together or not at all.
 /// </summary>
-public sealed class MatchAdminService(AppDbContext db, RankingService ranking, TimeProvider clock)
+public sealed class MatchAdminService(AppDbContext db, RankingService ranking, TimeProvider clock, ILogger<MatchAdminService> logger)
 {
     private static readonly TimeSpan FutureTolerance = TimeSpan.FromDays(1);
 
@@ -92,7 +92,11 @@ public sealed class MatchAdminService(AppDbContext db, RankingService ranking, T
             id = match.Id;
         }, ct);
 
-        return await ChangeResultAsync(id, warnedBefore, ct);
+        var result = await ChangeResultAsync(id, warnedBefore, ct);
+        logger.LogInformation("Match {MatchId} created: {Challenger} vs {Challenged}, result {Result}. {Movement}",
+            id, result.Match.Challenger.FullName, result.Match.Challenged.FullName, result.Match.Result, result.Match.MovementText);
+        LogNewWarnings(id, result);
+        return result;
     }
 
     public async Task<MatchChangeResultDto> UpdateAsync(int id, MatchInput input, CancellationToken ct)
@@ -118,7 +122,11 @@ public sealed class MatchAdminService(AppDbContext db, RankingService ranking, T
             await context.SaveChangesAsync(token);
         }, ct);
 
-        return await ChangeResultAsync(id, warnedBefore, ct);
+        var result = await ChangeResultAsync(id, warnedBefore, ct);
+        logger.LogInformation("Match {MatchId} updated: {Challenger} vs {Challenged}, result {Result}. {Movement}",
+            id, result.Match.Challenger.FullName, result.Match.Challenged.FullName, result.Match.Result, result.Match.MovementText);
+        LogNewWarnings(id, result);
+        return result;
     }
 
     /// <summary>Voids a match (it stays in the history but no longer counts). Voiding twice is a no-op.</summary>
@@ -127,7 +135,8 @@ public sealed class MatchAdminService(AppDbContext db, RankingService ranking, T
         var existing = await db.Matches.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id, ct) ?? throw ApiProblemException.NotFound("Match");
         var warnedBefore = await WarnedMatchIdsAsync(ct);
 
-        if (existing.Status != MatchStatus.Voided)
+        var alreadyVoided = existing.Status == MatchStatus.Voided;
+        if (!alreadyVoided)
         {
             var now = clock.GetUtcNow();
             await ranking.ExecuteAsync(async (context, token) =>
@@ -139,7 +148,23 @@ public sealed class MatchAdminService(AppDbContext db, RankingService ranking, T
             }, ct);
         }
 
-        return await ChangeResultAsync(id, warnedBefore, ct);
+        var result = await ChangeResultAsync(id, warnedBefore, ct);
+        if (!alreadyVoided)
+        {
+            logger.LogInformation("Match {MatchId} voided: {Challenger} vs {Challenged}", id, result.Match.Challenger.FullName, result.Match.Challenged.FullName);
+            LogNewWarnings(id, result);
+        }
+
+        return result;
+    }
+
+    private void LogNewWarnings(int matchId, MatchChangeResultDto result)
+    {
+        if (result.NewlyWarnedMatchIds.Count > 0)
+        {
+            logger.LogWarning("Change to match {MatchId} left {Count} later match(es) out of range: {MatchIds}",
+                matchId, result.NewlyWarnedMatchIds.Count, result.NewlyWarnedMatchIds);
+        }
     }
 
     // ---- Evaluation: validation + in-memory replay ----

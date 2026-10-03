@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GeiRanking.Api.Admin;
 
-public sealed class PlayerAdminService(AppDbContext db, RankingService ranking, IPhotoStorage photos, TimeProvider clock)
+public sealed class PlayerAdminService(AppDbContext db, RankingService ranking, IPhotoStorage photos, TimeProvider clock, ILogger<PlayerAdminService> logger)
 {
     public const long MaxPhotoBytes = 5 * 1024 * 1024;
 
@@ -48,6 +48,7 @@ public sealed class PlayerAdminService(AppDbContext db, RankingService ranking, 
             id = player.Id;
         }, ct);
 
+        logger.LogInformation("Player {PlayerId} created: {FullName} at position {Position}", id, request.FullName!.Trim(), request.Position?.ToString() ?? "last");
         return await GetAsync(id, ct);
     }
 
@@ -72,6 +73,7 @@ public sealed class PlayerAdminService(AppDbContext db, RankingService ranking, 
             await context.SaveChangesAsync(token);
         }, ct);
 
+        logger.LogInformation("Player {PlayerId} data updated", id);
         return await GetAsync(id, ct);
     }
 
@@ -92,6 +94,7 @@ public sealed class PlayerAdminService(AppDbContext db, RankingService ranking, 
             await context.SaveChangesAsync(token);
         }, ct);
 
+        logger.LogInformation("Player {PlayerId} deactivated (left the ranking)", id);
         return await GetAsync(id, ct);
     }
 
@@ -119,6 +122,7 @@ public sealed class PlayerAdminService(AppDbContext db, RankingService ranking, 
             await context.SaveChangesAsync(token);
         }, ct);
 
+        logger.LogInformation("Player {PlayerId} reactivated at position {Position}", id, request.Position?.ToString() ?? "last");
         return await GetAsync(id, ct);
     }
 
@@ -151,6 +155,7 @@ public sealed class PlayerAdminService(AppDbContext db, RankingService ranking, 
             await photos.DeleteAsync(previous, ct);
         }
 
+        logger.LogInformation("Player {PlayerId} photo set: {PhotoPath}", id, path);
         return await GetAsync(id, ct);
     }
 
@@ -163,6 +168,7 @@ public sealed class PlayerAdminService(AppDbContext db, RankingService ranking, 
             player.PhotoPath = null;
             await db.SaveChangesAsync(ct);
             await photos.DeleteAsync(previous, ct);
+            logger.LogInformation("Player {PlayerId} photo removed", id);
         }
 
         return await GetAsync(id, ct);
