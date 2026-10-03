@@ -1,4 +1,5 @@
 using System.Text.Json;
+using GeiRanking.Domain.Admin;
 using GeiRanking.Domain.Matches;
 using GeiRanking.Domain.Players;
 using GeiRanking.Infrastructure.Persistence;
@@ -10,6 +11,8 @@ namespace GeiRanking.Infrastructure;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     private static readonly JsonSerializerOptions ScoreJson = new(JsonSerializerDefaults.Web);
+
+    public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
 
     public DbSet<Player> Players => Set<Player>();
 
@@ -23,6 +26,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AdminUser>(e =>
+        {
+            e.ToTable("admin_users");
+            e.Property(a => a.Username).HasMaxLength(60);
+            e.Property(a => a.PasswordHash).HasMaxLength(300);
+            e.HasIndex(a => a.Username).IsUnique();
+        });
+
         modelBuilder.Entity<Player>(e =>
         {
             e.ToTable("players");

@@ -40,6 +40,9 @@ En desarrollo, `backend/src/GeiRanking.Api/appsettings.Development.json` ya apun
 | --- | --- |
 | `ConnectionStrings__Default` | Cadena de conexión a PostgreSQL. Para Neon usar `SSL Mode=Require`. |
 | `Cors__AllowedOrigins` | Orígenes permitidos, separados por coma. |
+| `Jwt__Secret` | Secreto para firmar los tokens del admin (32+ caracteres). **Obligatorio fuera de desarrollo**: sin él la API no arranca. En desarrollo, si falta, se genera uno al azar por arranque. |
+| `Admin__Username` / `Admin__Password` | Primer administrador, solo para el comando `seed-admin` (contraseña de 10+ caracteres). |
+| `Storage__PhotosPath` | Carpeta de las fotos de jugadores (por defecto `backend/src/GeiRanking.Api/uploads/photos`). |
 
 Fuera de desarrollo la cadena de conexión es obligatoria y no hay valores por defecto.
 
@@ -100,3 +103,37 @@ Sin login. Documentación interactiva en `/swagger` (solo en desarrollo).
 | `GET /api/players` | Jugadores ordenados por nombre (`?includeInactive=true` incluye bajas). |
 | `GET /api/players/{id}` | Perfil: datos, estadísticas (incluye defensas, % de victorias, racha, mejor posición), a quiénes puede desafiar y evolución de posición. |
 | `GET /api/matches` | Partidos válidos, del más nuevo al más viejo. Filtros: `playerId`, `from`, `to` (`yyyy-MM-dd`, inclusivos, en hora del club), `page`, `pageSize` (máx. 100). |
+
+## API de administración (Fase 4)
+Todo lo de `/api/admin/*` exige un JWT de administrador; sin token (o con uno vencido o inválido) responde 401. Los errores de negocio vuelven como `application/problem+json` con un `code` estable (y `errors` por campo, con códigos) que la interfaz traduce.
+
+### Crear el primer administrador
+```bash
+# PowerShell
+$env:Admin__Username = "admin"; $env:Admin__Password = "una-clave-larga-de-verdad"
+dotnet run --project backend/src/GeiRanking.Api -- seed-admin
+```
+Guarda solo el hash de la contraseña. Es idempotente: si el usuario ya existe no lo toca. En producción, definir además `Jwt__Secret` (por ejemplo `openssl rand -base64 48`).
+
+### Probarlo desde Swagger
+1. `dotnet run --project backend/src/GeiRanking.Api` y abrir `http://localhost:5172/swagger`.
+2. `POST /api/auth/login` con usuario y contraseña; copiar el `token`.
+3. Botón **Authorize** → pegar el token (solo el token, sin "Bearer").
+4. Los endpoints con candado ya quedan habilitados. Cerrar sesión es descartar el token (el cliente lo borra; no hay estado en el servidor).
+
+El login tiene límite de intentos (10 por minuto por IP, configurable con `RateLimit__LoginPermitPerMinute`). Detrás de un proxy inverso hay que configurar `ForwardedHeaders` para que se vea la IP real del cliente.
+
+| Endpoint | Qué hace |
+| --- | --- |
+| `POST /api/auth/login` | Devuelve el JWT (vale 8 horas por defecto). |
+| `GET /api/admin/me` | Usuario logueado; sirve para chequear que el token sigue vigente. |
+| `GET/POST /api/admin/players`, `GET/PUT /api/admin/players/{id}` | Listar, alta (al final o en `position`) y edición de datos. |
+| `POST /api/admin/players/{id}/deactivate` · `/reactivate` | Baja lógica (sale del ranking, los de abajo suben, se conserva el historial) y reingreso. |
+| `PUT/DELETE /api/admin/players/{id}/photo` | Subir (JPEG/PNG/WebP, máx. 5 MB; se recorta a 400×400 y se guarda como JPEG) o quitar la foto. Se sirve en `/photos/...`. |
+| `POST /api/admin/matches/preview` | Valida el resultado y muestra el movimiento que aplicaría, sin guardar. `?editingMatchId=` al editar. |
+| `POST /api/admin/matches` | Guarda el resultado y recalcula el ranking en **una sola transacción**. Un desafío fuera de rango (más de 5 puestos, o hacia abajo) devuelve 409 `OutOfRangeConfirmationRequired` hasta reenviar con `allowOutOfRange: true`. |
+| `PUT /api/admin/matches/{id}` · `POST /api/admin/matches/{id}/void` | Editar y anular, con recálculo. Los partidos posteriores que queden fuera de rango no se bloquean: se marcan (`warning`) y la respuesta trae `newlyWarnedMatchIds`. |
+| `GET /api/admin/matches` | Todos los partidos, también anulados. Filtros: `playerId`, `from`, `to`, `status`, `withWarnings`. |
+| `POST /api/admin/ranking/adjustments` | Mueve a un jugador a otra posición. El motivo es obligatorio. |
+
+Las fotos viven detrás de `IPhotoStorage` (hoy `LocalPhotoStorage`, en disco): para pasar a un servicio de archivos alcanza con otra implementación.

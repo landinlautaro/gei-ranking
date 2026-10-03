@@ -41,7 +41,7 @@ public sealed class PostgresFixture : IAsyncLifetime
     {
         await using var db = CreateContext();
         await db.Database.ExecuteSqlRawAsync(
-            "TRUNCATE ranking_history, ranking_snapshot, ranking_events, matches, players RESTART IDENTITY CASCADE");
+            "TRUNCATE ranking_history, ranking_snapshot, ranking_events, matches, players, admin_users RESTART IDENTITY CASCADE");
     }
 
     private async Task ExecuteAdminAsync(string sql)

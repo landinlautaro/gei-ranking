@@ -14,6 +14,11 @@ export default defineConfig({
         target: process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:5172',
         changeOrigin: true,
       },
+      // Player photos are served by the API (/photos/...).
+      '/photos': {
+        target: process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:5172',
+        changeOrigin: true,
+      },
     },
   },
   test: {

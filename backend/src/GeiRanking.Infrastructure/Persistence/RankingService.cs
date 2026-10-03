@@ -31,6 +31,14 @@ public class RankingService(AppDbContext db)
     /// <summary>Regenerates snapshot, history and match-derived fields from the events.</summary>
     public Task RebuildAsync(CancellationToken ct = default) => ExecuteAsync((_, _) => Task.CompletedTask, ct);
 
+    /// <summary>The persisted event log as domain events, read-only. Used to preview a change by replaying it in memory.</summary>
+    public async Task<List<RankingEvent>> LoadDomainEventsAsync(CancellationToken ct = default)
+    {
+        var events = await db.RankingEvents.AsNoTracking().ToListAsync(ct);
+        var matches = await db.Matches.AsNoTracking().ToDictionaryAsync(m => m.Id, ct);
+        return events.Select(e => ToDomainEvent(e, matches)).ToList();
+    }
+
     private async Task RebuildCoreAsync(CancellationToken ct)
     {
         var events = await db.RankingEvents.OrderBy(e => e.OccurredAt).ThenBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync(ct);
