@@ -145,7 +145,7 @@ function MatchRow({ match, onVoid, voiding }: { match: AdminMatch; onVoid: () =>
   const winnerIsChallenger = match.winner.id === match.challenger.id
 
   return (
-    <li className={`rounded-lg border bg-white p-3 shadow-sm ${voided ? 'border-slate-200 opacity-70' : match.warning ? 'border-amber-400' : 'border-slate-200'}`}>
+    <li className={`rounded-lg border p-3 shadow-sm ${voided ? '' : 'bg-white'} ${voided ? 'border-slate-200 bg-slate-50' : match.warning ? 'border-amber-400' : 'border-slate-200'}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
         <span className="text-slate-600">{formatDate(match.playedAt)}</span>
         <span className="flex items-center gap-2">

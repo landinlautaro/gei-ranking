@@ -76,8 +76,8 @@ export function RankingPage() {
                       <Link to={`/players/${r.player.id}`} className="flex items-center gap-2 hover:underline sm:gap-2.5">
                         <Avatar player={r.player} />
                         <span className="min-w-0">
-                          <span className="block truncate font-medium">{r.player.fullName}</span>
-                          {r.player.nickname && <span className="block truncate text-xs text-slate-500">“{r.player.nickname}”</span>}
+                          <span className="block break-words font-medium leading-tight sm:truncate">{r.player.fullName}</span>
+                          {r.player.nickname && <span className="block break-words text-xs leading-tight text-slate-500 sm:truncate">“{r.player.nickname}”</span>}
                         </span>
                       </Link>
                     </td>

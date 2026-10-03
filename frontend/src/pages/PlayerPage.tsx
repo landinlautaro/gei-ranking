@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { ApiError } from '../api/client'
 import { useMatches, usePlayer } from '../api/queries'
 import { Avatar } from '../components/Avatar'
 import { MatchCard } from '../components/MatchCard'
@@ -20,6 +21,9 @@ export function PlayerPage() {
   if (isError || !player) {
     return (
       <div className="space-y-4">
+        <h1 className="text-2xl font-bold">
+          {error instanceof ApiError && error.status === 404 ? 'Jugador no encontrado' : 'No se pudo cargar el jugador'}
+        </h1>
         <ErrorState error={error ?? new Error('No encontramos a ese jugador.')} onRetry={error ? () => void refetch() : undefined} />
         <Link to="/" className="text-sky-700 underline">Volver al ranking</Link>
       </div>
