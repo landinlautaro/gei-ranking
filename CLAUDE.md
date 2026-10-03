@@ -26,6 +26,8 @@ docker compose up -d                                  # PostgreSQL
 dotnet run --project backend/src/GeiRanking.Api       # API (Swagger en /swagger)
 npm run dev --prefix frontend                         # Frontend (http://localhost:5173)
 
-dotnet test backend                                   # tests backend
+dotnet ef database update --project backend/src/GeiRanking.Infrastructure --startup-project backend/src/GeiRanking.Api   # migraciones
+dotnet run --project backend/src/GeiRanking.Api -- rebuild-ranking   # regenera ranking desde los eventos
+dotnet test backend                                   # tests backend (Api.Tests usa el PostgreSQL de docker compose)
 npm test --prefix frontend                            # tests frontend (Vitest)
 ```
