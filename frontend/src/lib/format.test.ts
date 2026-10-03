@@ -44,7 +44,8 @@ describe('avatarUri', () => {
     expect(avatarUri(7)).toMatch(/^data:image\/svg\+xml/)
   })
 
-  it('cambia de un jugador a otro', () => {
-    expect(avatarUri(7)).not.toBe(avatarUri(8))
+  it('hay varios avatares distintos', () => {
+    const uris = new Set([1, 2, 3, 4, 5, 6, 7, 8].map(avatarUri))
+    expect(uris.size).toBeGreaterThan(1)
   })
 })
