@@ -1,0 +1,44 @@
+# Fly.io configuration for the API. Deploy from this folder:  fly deploy   (see docs/DEPLOY.md, "Paso 3").
+# NOTE: written from Fly's documentation, not run against a real account. Check it with `fly config validate`.
+
+app = "gei-ranking-api"      # must be unique across Fly: change it
+primary_region = "gru"       # São Paulo, the closest region to Argentina
+
+[build]
+  dockerfile = "Dockerfile"
+
+  [build.args]
+    # Fly mounts volumes owned by root; the default unprivileged user could not write the photos there.
+    APP_USER = "0"
+
+[env]
+  ASPNETCORE_FORWARDEDHEADERS_ENABLED = "true" # real client IP and https scheme behind Fly's proxy
+  # Secrets are NOT set here. Use `fly secrets set`:
+  #   ConnectionStrings__Default   Neon connection string (Npgsql format)
+  #   Jwt__Secret                  32+ random characters
+  #   Cors__AllowedOrigins         the site's address, e.g. https://gei-ranking.pages.dev
+
+[[mounts]]
+  source = "gei_photos"        # create it first:  fly volumes create gei_photos --size 1 --region gru
+  destination = "/data"        # the image stores photos in /data/photos
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Cheapest setup: the machine stops when idle and wakes on the next visit (a few seconds' delay).
+  # For an always-fast site set min_machines_running = 1 (costs a little more).
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/health"
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "25s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "512mb"

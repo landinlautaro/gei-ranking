@@ -1,0 +1,35 @@
+# Daily backup of the production database, kept as a private workflow artifact for 30 days.
+# Needs the repository secret DATABASE_URL (Settings > Secrets and variables > Actions), e.g.
+#   postgresql://user:password@ep-xxxx.sa-east-1.aws.neon.tech/neondb?sslmode=require   (Neon's direct connection)
+# The dump contains the players' names: only use this in a PRIVATE repository.
+name: Database backup
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # 07:00 UTC = 04:00 in Buenos Aires
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dump the database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_DIR: backups
+          PG_USE_DOCKER: "1" # postgres:17 client, never older than the server
+        run: ./ops/backup/backup.sh
+
+      - name: Keep the dump as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gei-ranking-db-${{ github.run_id }}
+          path: backups/*.dump
+          retention-days: 30
+          if-no-files-found: error

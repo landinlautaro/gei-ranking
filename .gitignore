@@ -18,6 +18,10 @@ coverage/
 !.env.example
 appsettings.Development.local.json
 
+# Database backups (contain players' data)
+backups/
+*.dump
+
 # Uploads (local photo storage)
 backend/src/GeiRanking.Api/uploads/
 

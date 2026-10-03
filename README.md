@@ -151,3 +151,37 @@ Entrar a `http://localhost:5173/admin` (hay un enlace "Administración" al pie d
 La fecha de un partido se guarda al mediodía en hora del club (UTC-3 fijo, sin horario de verano). Al editar un partido sin cambiar la fecha se conserva la hora original. Los mensajes de error de la API se traducen en `frontend/src/lib/errors.ts` a partir de sus códigos estables.
 
 En desarrollo Vite reenvía `/api` y `/photos` a la API. Los tests de la interfaz (`npm test --prefix frontend`) usan una API simulada; además se verificó el recorrido completo contra la API real con un navegador (login, carga con vista previa, anulación, fuera de rango, edición, foto, baja, ajuste y sesión vencida).
+
+## Despliegue y operación (Fase 6)
+La guía paso a paso para publicar la aplicación (Neon + Fly.io + Cloudflare Pages, o un servidor propio con Docker) está en **[`docs/DEPLOY.md`](docs/DEPLOY.md)**. Incluye la creación de la base, las migraciones, la carga inicial, el administrador, los backups programados y cómo restaurarlos.
+
+| Qué | Dónde |
+| --- | --- |
+| Imagen de producción de la API (usuario sin privilegios, logs JSON, sin Swagger) | [`backend/Dockerfile`](backend/Dockerfile) |
+| Imagen del sitio: nginx con caché, cabeceras de seguridad y proxy de `/api` y `/photos` | [`frontend/Dockerfile`](frontend/Dockerfile) y `frontend/nginx/` |
+| Stack completo en una máquina (PostgreSQL + API + sitio) | [`docker-compose.prod.yml`](docker-compose.prod.yml) |
+| Configuración de Fly.io | [`backend/fly.toml`](backend/fly.toml) |
+| Backups: `backup.sh` / `backup.ps1`, `verify-restore.sh`, workflow programado | [`ops/backup/`](ops/backup), [`.github/workflows/backup.yml`](.github/workflows/backup.yml) |
+
+Comandos de mantenimiento: nunca corren solos al arrancar. Los mismos funcionan desde el código (`dotnet run --project backend/src/GeiRanking.Api -- <comando>`) y desde la imagen Docker (`docker run ... gei-api <comando>`):
+
+| Comando | Qué hace |
+| --- | --- |
+| `migrate` | Aplica las migraciones pendientes de la base. |
+| `seed-admin` | Crea el primer administrador (`Admin__Username`, `Admin__Password`). |
+| `rebuild-ranking` | Regenera el ranking desde los eventos. |
+
+Probar las imágenes de producción en tu compu:
+
+```bash
+export DB_PASSWORD="una-clave" JWT_SECRET="$(openssl rand -base64 48)"
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml run --rm api migrate
+# sitio en http://localhost:8081
+docker compose -f docker-compose.prod.yml down -v   # borra todo al terminar
+```
+
+### Qué hace la API en producción
+- **Logs:** una línea JSON por evento (pedido, ingreso del admin, alta/edición/anulación de partidos, cambios de jugadores y fotos, ajustes con su motivo). Las acciones del administrador llevan su nombre. Nunca se registran contraseñas, y el texto escrito por usuarios se sanea antes de loguearlo.
+- **Seguridad:** cabeceras (`nosniff`, `X-Frame-Options`, CSP estricta, HSTS), Swagger/OpenAPI **solo en desarrollo**, límite de intentos de login por IP, errores de servidor sin detalles internos, fotos con caché de un año (cada subida tiene un nombre nuevo).
+- **Variables:** ver [`.env.example`](.env.example). Para el sitio, `VITE_API_BASE_URL` solo hace falta si se publica separado de la API.

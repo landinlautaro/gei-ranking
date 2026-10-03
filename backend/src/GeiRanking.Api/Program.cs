@@ -15,6 +15,13 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// On an empty database the first migration probes the history table, which does not exist yet: EF logs that expected
+// failure as an error. Silence just that, and only for the migrate command (real failures still throw and exit non-zero).
+if (args.Contains("migrate"))
+{
+    builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.None);
+}
+
 // Outside development, logs are one JSON object per line (what hosting platforms collect and search).
 if (!builder.Environment.IsDevelopment())
 {

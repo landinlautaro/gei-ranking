@@ -1,0 +1,10 @@
+# Files that run on Linux (containers, CI, servers) must keep LF line endings even when checked out on Windows,
+# otherwise "#!/usr/bin/env bash\r" and friends fail.
+*.sh              text eol=lf
+Dockerfile        text eol=lf
+*.template        text eol=lf
+*.conf            text eol=lf
+*.yml             text eol=lf
+*.toml            text eol=lf
+*.sql             text eol=lf
+.dockerignore     text eol=lf

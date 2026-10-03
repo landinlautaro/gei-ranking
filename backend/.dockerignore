@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/.vs/
+**/uploads/
+tests/
+db/
+*.md
+Dockerfile
+.dockerignore

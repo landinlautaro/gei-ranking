@@ -28,6 +28,9 @@ npm run dev --prefix frontend                         # Frontend (http://localho
 
 dotnet ef database update --project backend/src/GeiRanking.Infrastructure --startup-project backend/src/GeiRanking.Api   # migraciones
 dotnet run --project backend/src/GeiRanking.Api -- rebuild-ranking   # regenera ranking desde los eventos
+dotnet run --project backend/src/GeiRanking.Api -- migrate           # aplica migraciones (comando explícito; también en la imagen Docker)
+docker compose -f docker-compose.prod.yml up -d --build              # stack de producción local (necesita DB_PASSWORD y JWT_SECRET)
+./ops/backup/backup.sh  |  .\ops\backup\backup.ps1        # backup de la base (guía completa: docs/DEPLOY.md)
 dotnet test backend                                   # tests backend (Api.Tests usa el PostgreSQL de docker compose)
 npm test --prefix frontend                            # tests frontend (Vitest)
 ```

@@ -1,0 +1,59 @@
+# Production-like stack on one machine: PostgreSQL + API + web (nginx). Use it to try the real images locally
+# or as a simple self-hosted deployment on a VPS. For Neon + Fly.io + Cloudflare see docs/DEPLOY.md.
+#
+#   JWT_SECRET=$(openssl rand -base64 48) DB_PASSWORD=<something long> docker compose -f docker-compose.prod.yml up -d --build
+#   docker compose -f docker-compose.prod.yml run --rm api migrate
+#   (load backend/db/seed/001_initial_players.sql and create the admin: see docs/DEPLOY.md, "Opción B")
+#
+# The site is served at http://localhost:${WEB_PORT:-8081}. Only the web container is exposed; the API is reached through it.
+
+name: gei-ranking-prod
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gei
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      POSTGRES_DB: gei_ranking
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gei -d gei_ranking"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    image: gei-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Default: Host=db;Port=5432;Database=gei_ranking;Username=gei;Password=${DB_PASSWORD:?Set DB_PASSWORD}
+      Jwt__Secret: ${JWT_SECRET:?Set JWT_SECRET (32+ characters)}
+      Cors__AllowedOrigins: http://localhost:${WEB_PORT:-8081}
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      # Only used by the seed-admin command:
+      Admin__Username: ${ADMIN_USERNAME:-}
+      Admin__Password: ${ADMIN_PASSWORD:-}
+    volumes:
+      - photos:/data/photos
+
+  web:
+    build: ./frontend
+    image: gei-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      API_UPSTREAM: http://api:8080
+    ports:
+      - "${WEB_PORT:-8081}:8080"
+
+volumes:
+  pgdata:
+  photos:
