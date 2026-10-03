@@ -1,3 +1,5 @@
+using GeiRanking.Domain.Ranking;
+
 namespace GeiRanking.Domain.Matches;
 
 public class Match
@@ -30,6 +32,9 @@ public class Match
 
     /// <summary>Human readable "movimiento aplicado" text, derived from the ranking replay.</summary>
     public string? MovementText { get; set; }
+
+    /// <summary>Set by the replay when the match was out of range or could not be applied; shown to the admin.</summary>
+    public RankingWarningCode? Warning { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
 
