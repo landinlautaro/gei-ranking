@@ -1,7 +1,7 @@
 export function LoadingState({ label = 'Cargando…' }: { label?: string }) {
   return (
     <div role="status" className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 text-slate-600">
-      <span className="size-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" aria-hidden="true" />
+      <span className="size-4 animate-spin motion-reduce:animate-none rounded-full border-2 border-slate-300 border-t-slate-600" aria-hidden="true" />
       {label}
     </div>
   )

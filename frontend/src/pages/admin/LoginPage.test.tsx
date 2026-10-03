@@ -71,11 +71,11 @@ describe('Login y acceso a la administración', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Demasiados intentos')
   })
 
-  it('el botón queda deshabilitado hasta completar usuario y contraseña', () => {
+  it('el botón queda deshabilitado hasta completar usuario y contraseña', async () => {
     mockApi({})
     renderApp('/admin/login')
 
-    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeDisabled()
+    expect(await screen.findByRole('button', { name: 'Ingresar' })).toBeDisabled()
   })
 
   it('con sesión iniciada, el login redirige a la administración', async () => {

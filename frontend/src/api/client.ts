@@ -1,3 +1,4 @@
+import { apiUrl } from '../lib/apiUrl'
 import { getSession } from '../lib/authStore'
 
 export class ApiError extends Error {
@@ -72,7 +73,7 @@ export async function request<T>(method: string, path: string, options: RequestO
 
   let response: Response
   try {
-    response = await fetch(url, { method, headers, body, signal: options.signal })
+    response = await fetch(apiUrl(url), { method, headers, body, signal: options.signal })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     throw new ApiError('No se pudo conectar con el servidor.', null)

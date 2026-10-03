@@ -1,7 +1,10 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { setUnauthorizedHandler } from '../../api/client'
 import { clearSession, useSession } from '../../lib/authStore'
+import { useFocusMainOnNavigation } from '../../lib/useFocusMain'
+import { LoadingState } from '../PageState'
+import { SkipLink } from '../SkipLink'
 import { Button } from '../ui'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
@@ -13,6 +16,8 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
 export function AdminLayout() {
   const session = useSession()
   const location = useLocation()
+  const main = useRef<HTMLElement>(null)
+  useFocusMainOnNavigation(main)
 
   useEffect(() => {
     setUnauthorizedHandler(() => clearSession('expired'))
@@ -23,6 +28,7 @@ export function AdminLayout() {
 
   return (
     <div className="flex min-h-dvh flex-col">
+      <SkipLink />
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
           <Link to="/admin/results/new" className="text-lg font-bold tracking-tight">
@@ -43,8 +49,10 @@ export function AdminLayout() {
           <NavLink to="/admin/adjustments" className={navClass}>Ajustes</NavLink>
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
-        <Outlet />
+      <main id="contenido" ref={main} tabIndex={-1} className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 outline-none">
+        <Suspense fallback={<LoadingState label="Cargando…" />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   )
