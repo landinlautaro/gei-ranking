@@ -12,4 +12,12 @@ public class ClubClockTests
 
         Assert.Equal("10/03/2026", ClubClock.FormatDate(utc));
     }
+
+    [Fact]
+    public void StartOfDayUtc_IsMidnightBuenosAires()
+    {
+        var start = ClubClock.StartOfDayUtc(new DateOnly(2026, 3, 10));
+
+        Assert.Equal(new DateTimeOffset(2026, 3, 10, 3, 0, 0, TimeSpan.Zero), start);
+    }
 }

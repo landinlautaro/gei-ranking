@@ -1,3 +1,4 @@
+using GeiRanking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +19,9 @@ public static class DependencyInjection
             // Neon scales to zero: the first connection after idle can take a few seconds or fail transiently.
             npgsql.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorCodesToAdd: null);
             npgsql.CommandTimeout(30);
-        }));
+        }).UseSnakeCaseNamingConvention());
+
+        services.AddScoped<RankingService>();
 
         return services;
     }

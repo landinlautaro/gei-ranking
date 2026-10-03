@@ -39,4 +39,12 @@ public class Match
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; }
+
+    /// <summary>Result as shown in the results list: <c>6-4 3-6 10-7</c>, <c>W.O.</c> or the partial score with "(ab.)".</summary>
+    public string FormatResult() => Completion switch
+    {
+        CompletionType.Walkover => "W.O.",
+        CompletionType.Retirement => $"{Score.Format()} (ab.)".Trim(),
+        _ => Score.Format(),
+    };
 }
