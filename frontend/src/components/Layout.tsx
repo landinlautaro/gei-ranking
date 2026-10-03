@@ -26,7 +26,10 @@ export function Layout() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
         <Outlet />
       </main>
-      <footer className="px-4 py-6 text-center text-xs text-slate-500">Ranking interno de tenis · Club GEI</footer>
+      <footer className="px-4 py-6 text-center text-xs text-slate-500">
+        Ranking interno de tenis · Club GEI ·{' '}
+        <Link to="/admin" className="underline">Administración</Link>
+      </footer>
     </div>
   )
 }

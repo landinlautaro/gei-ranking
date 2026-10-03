@@ -196,7 +196,7 @@ public static class AdminEndpoints
                 throw ApiProblemException.NotFound("Player");
             }
 
-            throw ApiProblemException.Conflict("PlayerNotRanked", "The player is not in the ranking.");
+            throw ApiProblemException.Conflict("PlayerNotInRanking", "The player is not in the ranking.");
         }
 
         if (request.NewPosition < 1 || request.NewPosition > snapshot.Count)

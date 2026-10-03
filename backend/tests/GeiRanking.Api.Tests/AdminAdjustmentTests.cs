@@ -88,6 +88,6 @@ public class AdminAdjustmentTests(PostgresFixture fixture) : AdminApiTestBase(fi
 
         Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, inactive.StatusCode);
-        Assert.Equal("PlayerNotRanked", (await ProblemAsync(inactive)).Code);
+        Assert.Equal("PlayerNotInRanking", (await ProblemAsync(inactive)).Code);
     }
 }
