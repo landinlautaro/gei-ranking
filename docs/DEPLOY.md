@@ -368,6 +368,7 @@ Alternativas razonables a lo propuesto, para decidir con información (precios a
 | Síntoma | Causa probable y solución |
 | --- | --- |
 | El sitio carga pero el ranking dice "No se pudo conectar con el servidor" | La API está apagada (esperá unos segundos y reintentá), o `VITE_API_BASE_URL` apunta mal: reconstruí y volvé a subir el sitio. |
+| El ranking dice "Unexpected token '<'… is not valid JSON" o "El servidor no respondió como se esperaba" | El sitio se construyó sin `VITE_API_BASE_URL`: los pedidos van a Pages, que devuelve `index.html`. Definí la variable, reconstruí y volvé a subir el sitio. |
 | En la consola del navegador: error de **CORS** | `Cors__AllowedOrigins` no coincide **exactamente** con la dirección del sitio (con `https://`, sin barra al final). `fly secrets set "Cors__AllowedOrigins=..."`. |
 | Al recargar `/players/5` o `/admin` aparece "Not found" | Falta `_redirects` en el sitio publicado: tiene que estar en `frontend/public` y haberse incluido en el build. |
 | La primera visita tarda 5-10 segundos | Máquina de Fly apagada y/o base de Neon dormida. Es esperado; con `min_machines_running = 1` se acorta. |
