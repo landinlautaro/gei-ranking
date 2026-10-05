@@ -68,9 +68,8 @@ const SECTIONS: RulesSection[] = [
   {
     title: 'Resultado y movimiento en el ranking',
     paragraphs: [
-      'Cuando el desafiante gana el partido, intercambia su posición con el jugador desafiado.',
-      'Cuando el jugador desafiado gana, mantiene su posición y el desafiante permanece en su puesto.',
-      'En caso de que el jugador desafiado gane, además, podrá avanzar una (1) posición en el ranking, según la regla de movimiento establecida para el ranking interno y siempre que ello no genere una contradicción con la clasificación vigente. El coordinador será quien realice la actualización correspondiente.',
+      'Si el desafiante gana el partido, intercambia su posición con el jugador desafiado, ocupando la posición que tenía el desafiado.',
+      'Si el jugador desafiado gana el partido, avanza una (1) posición en el ranking. El desafiante mantiene la posición que tenía antes del partido.',
     ],
   },
   {
