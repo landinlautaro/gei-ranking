@@ -6,7 +6,6 @@ import { MatchesPage } from './pages/MatchesPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PlayerPage } from './pages/PlayerPage'
 import { RankingPage } from './pages/RankingPage'
-import { RulesPage } from './pages/RulesPage'
 
 // The administration is only for one person: its code is downloaded on demand, so the public pages stay light.
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout').then((m) => ({ default: m.AdminLayout })))
@@ -28,7 +27,6 @@ export default function App() {
         <Route index element={<RankingPage />} />
         <Route path="players/:id" element={<PlayerPage />} />
         <Route path="matches" element={<MatchesPage />} />
-        <Route path="rules" element={<RulesPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 

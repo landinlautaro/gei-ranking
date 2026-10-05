@@ -27,9 +27,6 @@ export function Layout() {
             <NavLink to="/matches" className={navClass}>
               Partidos
             </NavLink>
-            <NavLink to="/rules" className={navClass}>
-              Reglamento
-            </NavLink>
           </nav>
         </div>
       </header>
