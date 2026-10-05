@@ -9,9 +9,11 @@ describe('RulesPage', () => {
   it('muestra el reglamento y marca la página actual en el menú', () => {
     renderApp('/rules')
 
-    expect(screen.getByRole('heading', { name: 'Reglamento', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText(/hasta 5 puestos por encima/)).toBeInTheDocument()
-    expect(screen.getByText(/Super Tie-Break a 10 puntos/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Reglamento – Ranking interno de tenis/, level: 1 })).toBeInTheDocument()
+    expect(screen.getByText('Versión 1')).toBeInTheDocument()
+    expect(screen.getByText(/hasta cinco \(5\) posiciones por encima/)).toBeInTheDocument()
+    expect(screen.getByText(/Super Tie-Break a 10 puntos\./)).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(13)
     expect(screen.getByRole('link', { name: 'Reglamento' })).toHaveAttribute('aria-current', 'page')
   })
 
@@ -22,6 +24,6 @@ describe('RulesPage', () => {
 
     await userEvent.click(screen.getByRole('link', { name: 'Reglamento' }))
 
-    expect(await screen.findByRole('heading', { name: 'Reglamento', level: 1 })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /Reglamento – Ranking interno de tenis/, level: 1 })).toBeInTheDocument()
   })
 })
