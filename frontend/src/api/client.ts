@@ -81,6 +81,14 @@ export async function request<T>(method: string, path: string, options: RequestO
 
   if (!response.ok) throw await toApiError(response, Boolean(token))
   if (response.status === 204) return undefined as T
+  // A misconfigured build (no VITE_API_BASE_URL) gets the SPA's index.html back with a 200.
+  if (!/json/i.test(response.headers.get('Content-Type') ?? '')) {
+    throw new ApiError(
+      'El servidor no respondió como se esperaba. Revisá la configuración de la dirección de la API.',
+      response.status,
+      'unexpected_response',
+    )
+  }
   return response.json() as Promise<T>
 }
 

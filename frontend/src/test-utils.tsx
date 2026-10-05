@@ -109,7 +109,7 @@ export function mockApi(routes: Record<string, Responder | number>) {
     if (typeof route === 'number') return { ok: false, status: route, json: async () => ({}) }
     const result = typeof route === 'function' ? route(query, body) : route
     if (result instanceof ProblemResponse) return { ok: false, status: result.status, json: async () => result.body }
-    return { ok: true, status: 200, json: async () => result }
+    return { ok: true, status: 200, headers: new Headers({ 'Content-Type': 'application/json' }), json: async () => result }
   })
   vi.stubGlobal('fetch', fetchMock)
   return { calls, requests, fetchMock }
