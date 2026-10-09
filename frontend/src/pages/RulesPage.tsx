@@ -8,8 +8,8 @@ interface RulesSection {
   afterItems?: string[]
 }
 
-// Reglamento oficial, versión 1. Para publicar una nueva versión, actualizar RULES_VERSION y las secciones.
-const RULES_VERSION = 1
+// Reglamento oficial, versión 2. Para publicar una nueva versión, actualizar RULES_VERSION y las secciones.
+const RULES_VERSION = 2
 
 const SECTIONS: RulesSection[] = [
   {
@@ -21,22 +21,23 @@ const SECTIONS: RulesSection[] = [
   {
     title: 'Publicación del ranking',
     paragraphs: [
-      'El ranking será actualizado y publicado por el coordinador todos los lunes por la mañana en el grupo de WhatsApp correspondiente.',
+      'El ranking será actualizado y publicado por el coordinador semanalmente todos los lunes por la mañana en el grupo de WhatsApp correspondiente.',
       'La clasificación publicada el lunes será la referencia para los desafíos de esa semana.',
     ],
   },
   {
     title: 'Período para realizar desafíos',
     paragraphs: [
-      'Los jugadores podrán realizar desafíos desde el lunes, una vez publicado el ranking, hasta el miércoles inclusive.',
-      'El desafío podrá realizarse el mismo lunes y, si los jugadores lo coordinan, el partido podrá disputarse antes del plazo general establecido.',
+      'Los jugadores podrán realizar e iniciar desafíos desde el lunes, una vez publicado el ranking, hasta el miércoles inclusive de esa misma semana.',
+      'El desafío podrá realizarse el mismo lunes y, si los jugadores lo coordinan, el partido podrá disputarse de inmediato (por ejemplo, coordinar, jugarlo y pasar el resultado el mismo lunes).',
+      'Si los jugadores juegan el partido antes del miércoles y pasan el resultado, se da por cumplido su desafío semanal y no tienen que realizar ni recibir otro desafío durante esa semana.',
       'El miércoles será el último día para iniciar un nuevo desafío correspondiente a esa semana.',
     ],
   },
   {
     title: 'Plazo para jugar y comunicar el resultado',
     paragraphs: [
-      'Los desafíos realizados durante la semana deberán ser coordinados entre los jugadores y disputados dentro del período correspondiente.',
+      'Los desafíos realizados durante la semana deberán ser coordinados entre los jugadores y disputados dentro del período correspondiente, contando con toda la semana, incluido el fin de semana, para jugarlo.',
       'Como fecha límite, el resultado deberá ser informado en el grupo de WhatsApp hasta el domingo inclusive.',
       'El coordinador realizará el seguimiento de los desafíos y podrá consultar a los jugadores involucrados para verificar que los partidos hayan sido coordinados y/o disputados.',
     ],
@@ -44,6 +45,7 @@ const SECTIONS: RulesSection[] = [
   {
     title: 'Sistema de desafíos',
     items: [
+      'Se permite jugar únicamente un (1) desafío o partido por semana en el ranking por jugador.',
       'Un jugador podrá desafiar únicamente a otro jugador que se encuentre hasta cinco (5) posiciones por encima de su puesto en el ranking.',
       'No se permiten desafíos hacia jugadores que estén por debajo del desafiante.',
       'El desafío queda automáticamente aceptado desde el momento en que es comunicado.',

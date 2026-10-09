@@ -10,7 +10,7 @@ describe('RulesPage', () => {
     renderApp('/rules')
 
     expect(screen.getByRole('heading', { name: /Reglamento – Ranking interno de tenis/, level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('Versión 1')).toBeInTheDocument()
+    expect(screen.getByText('Versión 2')).toBeInTheDocument()
     expect(screen.getByText(/hasta cinco \(5\) posiciones por encima/)).toBeInTheDocument()
     expect(screen.getByText(/Super Tie-Break a 10 puntos\./)).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(13)
