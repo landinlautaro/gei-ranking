@@ -45,7 +45,7 @@ export function PlayerPage() {
         <Avatar player={player} size="lg" />
         <div className="min-w-0">
           <h1 className="text-2xl font-bold">{player.fullName}</h1>
-          {player.nickname && <p className="text-slate-600">“{player.nickname}”</p>}
+          {player.nickname && <p className="text-slate-700">“{player.nickname}”</p>}
           <p className="mt-1 flex flex-wrap items-center gap-x-2 text-lg">
             {player.position !== null ? (
               <>
@@ -53,14 +53,14 @@ export function PlayerPage() {
                 <MovementBadge movement={player.movement} />
               </>
             ) : (
-              <span className="text-slate-600">Fuera del ranking</span>
+              <span className="text-slate-700">Fuera del ranking</span>
             )}
-            {!player.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">Inactivo</span>}
+            {!player.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-sm font-semibold text-slate-700">Inactivo</span>}
           </p>
         </div>
       </header>
 
-      <p className="text-sm text-slate-600">{details.join(' · ')}</p>
+      <p className="text-sm text-slate-700">{details.join(' · ')}</p>
 
       <section aria-labelledby="stats-title">
         <h2 id="stats-title" className="text-lg font-semibold">Estadísticas</h2>
@@ -96,7 +96,7 @@ export function PlayerPage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-slate-600">
+          <p className="mt-3 text-slate-700">
             {player.position === 1 ? 'Es el número uno: no hay nadie por encima para desafiar.' : 'No está en el ranking, así que no puede desafiar.'}
           </p>
         )}
@@ -114,7 +114,7 @@ export function PlayerPage() {
         <div className="mt-3">
           {matches.isPending && <LoadingState label="Cargando partidos…" />}
           {matches.isError && <ErrorState error={matches.error} onRetry={() => void matches.refetch()} />}
-          {matches.data && matches.data.items.length === 0 && <p className="text-slate-600">Todavía no jugó partidos.</p>}
+          {matches.data && matches.data.items.length === 0 && <p className="text-slate-700">Todavía no jugó partidos.</p>}
           {matches.data && matches.data.items.length > 0 && (
             <>
               <ul className="space-y-2">
@@ -138,7 +138,7 @@ export function PlayerPage() {
 function Stat({ label, value, small = false }: { label: string; value: React.ReactNode; small?: boolean }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-      <dt className="text-xs text-slate-600">{label}</dt>
+      <dt className="text-sm text-slate-700">{label}</dt>
       <dd className={`mt-1 font-bold tabular-nums ${small ? 'text-base' : 'text-2xl'}`}>{value}</dd>
     </div>
   )

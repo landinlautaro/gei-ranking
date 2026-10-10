@@ -27,7 +27,7 @@ class Boundary extends Component<Props, State> {
     return (
       <main className="mx-auto max-w-md px-4 py-16 text-center">
         <h1 className="text-2xl font-bold">Algo salió mal</h1>
-        <p className="mt-2 text-slate-600">La página tuvo un problema inesperado. Probá recargarla; si sigue pasando, avisale a quien administra el ranking.</p>
+        <p className="mt-2 text-slate-700">La página tuvo un problema inesperado. Probá recargarla; si sigue pasando, avisale a quien administra el ranking.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             type="button"

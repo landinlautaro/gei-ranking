@@ -56,9 +56,9 @@ export function AdminPlayersPage() {
                   <Avatar player={p} />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{p.fullName}</span>
-                    {p.nickname && <span className="block truncate text-xs text-slate-500">“{p.nickname}”</span>}
+                    {p.nickname && <span className="block truncate text-sm text-slate-700">“{p.nickname}”</span>}
                   </span>
-                  {!p.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">Inactivo</span>}
+                  {!p.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-sm font-semibold text-slate-700">Inactivo</span>}
                   <span className="text-sm text-brand hover:text-accent">Editar</span>
                 </Link>
               </li>
@@ -125,9 +125,9 @@ function EditPlayer({ player }: { player: AdminPlayer }) {
     <div className="space-y-8">
       <h1 className="mt-2 flex flex-wrap items-center gap-3 text-2xl font-bold">
         {player.fullName}
-        {!player.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">Inactivo</span>}
+        {!player.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-sm font-semibold text-slate-700">Inactivo</span>}
       </h1>
-      <p className="-mt-6 text-slate-600">
+      <p className="-mt-6 text-slate-700">
         {player.position !== null ? `Puesto #${player.position}` : 'Fuera del ranking'} · En el club desde {formatDate(player.joinedAt)}
       </p>
 
@@ -228,7 +228,7 @@ function PhotoSection({ player }: { player: AdminPlayer }) {
       <div className="flex flex-wrap items-center gap-4">
         <Avatar player={player} size="lg" />
         <div className="space-y-2">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-700">
             {player.photoPath ? 'Foto subida.' : 'Sin foto: se muestra un avatar generado.'} Formatos JPEG, PNG o WebP, hasta 5 MB; se recorta a un cuadrado.
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -249,7 +249,7 @@ function PhotoSection({ player }: { player: AdminPlayer }) {
               <ConfirmButton label="Quitar foto" question="¿Quitar la foto?" confirmLabel="Sí, quitar" disabled={remove.isPending} onConfirm={() => remove.mutate()} />
             )}
           </div>
-          {upload.isPending && <p role="status" className="text-sm text-slate-600">Subiendo…</p>}
+          {upload.isPending && <p role="status" className="text-sm text-slate-700">Subiendo…</p>}
           {Boolean(error) && <Notice tone="error" live>{describeError(error)}</Notice>}
         </div>
       </div>
@@ -269,7 +269,7 @@ function StatusSection({ player }: { player: AdminPlayer }) {
       {Boolean(error) && <Notice tone="error" live>{describeError(error)}</Notice>}
       {player.isActive ? (
         <>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-700">
             Dar de baja lo saca del ranking y todos los que están abajo suben un puesto. Su historial se conserva.
           </p>
           <ConfirmButton
@@ -283,7 +283,7 @@ function StatusSection({ player }: { player: AdminPlayer }) {
         </>
       ) : (
         <div className="max-w-xs space-y-3">
-          <p className="text-sm text-slate-600">Está dado de baja. Podés volver a ingresarlo al ranking.</p>
+          <p className="text-sm text-slate-700">Está dado de baja. Podés volver a ingresarlo al ranking.</p>
           <Field label="Posición (opcional)" hint="Vacío: entra en el último puesto.">
             <input type="number" min={1} inputMode="numeric" className={inputClass} value={position} onChange={(e) => setPosition(e.target.value)} />
           </Field>

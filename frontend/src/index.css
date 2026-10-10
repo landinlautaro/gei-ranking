@@ -12,6 +12,10 @@
   --color-ink: #000000; /* texto */
 }
 
+html {
+  font-size: 112.5%; /* base de 18px: todo lo que está en rem escala solo */
+}
+
 body {
   @apply bg-slate-50 font-sans text-ink antialiased;
 }

@@ -47,7 +47,7 @@ export function PositionChart({ points, until }: PositionChartProps) {
   const ranked = data.filter((d): d is typeof d & { position: number } => d.position !== null)
 
   if (ranked.length === 0) {
-    return <p className="text-slate-600">Todavía no hay historial de posiciones.</p>
+    return <p className="text-slate-700">Todavía no hay historial de posiciones.</p>
   }
 
   const tStart = data[0].t
@@ -123,13 +123,13 @@ export function PositionChart({ points, until }: PositionChartProps) {
           {yTicks.map((p) => (
             <g key={p}>
               <line x1={MARGIN.left} x2={width - MARGIN.right} y1={y(p)} y2={y(p)} stroke={GRID} strokeWidth={1} />
-              <text x={MARGIN.left - 8} y={y(p)} dy="0.32em" textAnchor="end" className="fill-slate-600 text-xs">
+              <text x={MARGIN.left - 8} y={y(p)} dy="0.32em" textAnchor="end" className="fill-slate-700 text-xs">
                 #{p}
               </text>
             </g>
           ))}
           {xTicks.map((t) => (
-            <text key={t.left} x={t.left} y={HEIGHT - 8} textAnchor={t.anchor as 'start' | 'middle' | 'end'} className="fill-slate-600 text-xs">
+            <text key={t.left} x={t.left} y={HEIGHT - 8} textAnchor={t.anchor as 'start' | 'middle' | 'end'} className="fill-slate-700 text-xs">
               {t.label}
             </text>
           ))}
@@ -157,7 +157,7 @@ export function PositionChart({ points, until }: PositionChartProps) {
             style={{ left: Math.min(Math.max(x(point.t), 44), width - 44), top: Math.max(y(point.position) - 10, 40) }}
           >
             <div className="text-base font-bold tabular-nums text-slate-900">#{point.position}</div>
-            <div className="text-xs text-slate-600">{formatDate(point.at)}</div>
+            <div className="text-xs text-slate-700">{formatDate(point.at)}</div>
           </div>
         )}
       </div>
@@ -166,7 +166,7 @@ export function PositionChart({ points, until }: PositionChartProps) {
         <summary className="cursor-pointer text-slate-700 underline-offset-2 hover:underline">Ver como tabla</summary>
         <table className="mt-2 w-full max-w-xs text-left">
           <thead>
-            <tr className="border-b border-slate-200 text-slate-600">
+            <tr className="border-b border-slate-200 text-slate-700">
               <th className="py-1 pr-4 font-medium">Fecha</th>
               <th className="py-1 font-medium">Posición</th>
             </tr>

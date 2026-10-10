@@ -36,7 +36,7 @@ export function LoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-4 py-8">
       <h1 className="text-2xl font-bold">Administración</h1>
-      <p className="mt-1 text-slate-600">Ingresá para cargar resultados y gestionar jugadores.</p>
+      <p className="mt-1 text-slate-700">Ingresá para cargar resultados y gestionar jugadores.</p>
 
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         {expired && <Notice tone="warning" live>Tu sesión venció. Volvé a ingresar.</Notice>}

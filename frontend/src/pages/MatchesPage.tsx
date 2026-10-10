@@ -7,7 +7,7 @@ import { useDocumentTitle } from '../lib/useDocumentTitle'
 const PAGE_SIZE = 20
 
 const fieldClass =
-  'w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand'
+  'min-h-12 w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand'
 
 export function MatchesPage() {
   useDocumentTitle('Partidos')
@@ -67,7 +67,7 @@ export function MatchesPage() {
           <button
             type="button"
             onClick={() => setParams(new URLSearchParams())}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand"
+            className="min-h-12 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand"
           >
             Limpiar filtros
           </button>
@@ -87,7 +87,7 @@ export function MatchesPage() {
         )}
         {data && data.items.length > 0 && (
           <>
-            <p className="mb-2 text-sm text-slate-600">
+            <p className="mb-2 text-sm text-slate-700">
               {data.total} {data.total === 1 ? 'partido' : 'partidos'}
             </p>
             <ul className={`space-y-2 ${isPlaceholderData ? 'opacity-60' : ''}`}>
@@ -101,16 +101,16 @@ export function MatchesPage() {
                   type="button"
                   disabled={page <= 1}
                   onClick={() => update({ page: String(page - 1) })}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium enabled:hover:bg-slate-100 disabled:opacity-40"
+                  className="min-h-12 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium enabled:hover:bg-slate-100 disabled:opacity-40"
                 >
                   ← Anterior
                 </button>
-                <span className="text-sm text-slate-600">Página {page} de {totalPages}</span>
+                <span className="text-sm text-slate-700">Página {page} de {totalPages}</span>
                 <button
                   type="button"
                   disabled={page >= totalPages}
                   onClick={() => update({ page: String(page + 1) })}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium enabled:hover:bg-slate-100 disabled:opacity-40"
+                  className="min-h-12 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium enabled:hover:bg-slate-100 disabled:opacity-40"
                 >
                   Siguiente →
                 </button>

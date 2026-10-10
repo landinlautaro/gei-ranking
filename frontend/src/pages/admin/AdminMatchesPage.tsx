@@ -115,7 +115,7 @@ export function AdminMatchesPage() {
 
         {data && data.items.length > 0 && (
           <>
-            <p className="text-sm text-slate-600">{plural(data.total, 'partido', 'partidos')}</p>
+            <p className="text-sm text-slate-700">{plural(data.total, 'partido', 'partidos')}</p>
             <ul className="space-y-2">
               {data.items.map((m) => (
                 <MatchRow
@@ -129,7 +129,7 @@ export function AdminMatchesPage() {
             {totalPages > 1 && (
               <nav aria-label="Paginación" className="flex items-center justify-between gap-3">
                 <Button variant="secondary" disabled={page <= 1} onClick={() => update({ page: String(page - 1) })}>← Anterior</Button>
-                <span className="text-sm text-slate-600">Página {page} de {totalPages}</span>
+                <span className="text-sm text-slate-700">Página {page} de {totalPages}</span>
                 <Button variant="secondary" disabled={page >= totalPages} onClick={() => update({ page: String(page + 1) })}>Siguiente →</Button>
               </nav>
             )}
@@ -147,11 +147,11 @@ function MatchRow({ match, onVoid, voiding }: { match: AdminMatch; onVoid: () =>
   return (
     <li className={`rounded-lg border p-3 shadow-sm ${voided ? '' : 'bg-white'} ${voided ? 'border-slate-200 bg-slate-50' : match.warning ? 'border-amber-400' : 'border-slate-200'}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
-        <span className="text-slate-600">{formatDate(match.playedAt)}</span>
+        <span className="text-slate-700">{formatDate(match.playedAt)}</span>
         <span className="flex items-center gap-2">
-          {voided && <span className="rounded bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">Anulado</span>}
+          {voided && <span className="rounded bg-slate-200 px-2 py-0.5 text-sm font-semibold text-slate-700">Anulado</span>}
           {match.warning && (
-            <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900" title={messageForCode(match.warning)}>
+            <span className="rounded bg-amber-100 px-2 py-0.5 text-sm font-semibold text-amber-900" title={messageForCode(match.warning)}>
               Advertencia: {match.warning === 'OutOfRange' ? 'fuera de rango' : 'no se pudo aplicar'}
             </span>
           )}
@@ -159,14 +159,14 @@ function MatchRow({ match, onVoid, voiding }: { match: AdminMatch; onVoid: () =>
         </span>
       </div>
       <p className="mt-1">
-        <span className={winnerIsChallenger ? 'font-semibold' : 'text-slate-600'}>{match.challenger.fullName}</span>
-        <span className="mx-2 text-xs uppercase text-slate-500">vs</span>
-        <span className={!winnerIsChallenger ? 'font-semibold' : 'text-slate-600'}>{match.challenged.fullName}</span>
+        <span className={winnerIsChallenger ? 'font-semibold' : 'text-slate-700'}>{match.challenger.fullName}</span>
+        <span className="mx-2 text-sm uppercase text-slate-700">vs</span>
+        <span className={!winnerIsChallenger ? 'font-semibold' : 'text-slate-700'}>{match.challenged.fullName}</span>
         <span className="sr-only"> (ganó {match.winner.fullName})</span>
       </p>
-      {match.movementText && <p className="mt-1 text-sm text-slate-600">{match.movementText}</p>}
+      {match.movementText && <p className="mt-1 text-sm text-slate-700">{match.movementText}</p>}
       {match.warning && <p className="mt-1 text-sm text-amber-900">{messageForCode(match.warning)}</p>}
-      {match.notes && <p className="mt-1 text-sm italic text-slate-500">{match.notes}</p>}
+      {match.notes && <p className="mt-1 text-sm italic text-slate-700">{match.notes}</p>}
       {!voided && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Link

@@ -1,7 +1,7 @@
 import { cloneElement, isValidElement, useId, useState, type ButtonHTMLAttributes, type ReactElement, type ReactNode } from 'react'
 
 export const inputClass =
-  'w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand disabled:bg-slate-100 aria-[invalid=true]:border-red-500'
+  'min-h-12 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand disabled:bg-slate-100 aria-[invalid=true]:border-red-500'
 
 interface FieldProps {
   label: string
@@ -23,7 +23,7 @@ export function Field({ label, error, hint, children }: FieldProps) {
       {isValidElement(children) &&
         cloneElement(children, { id, 'aria-describedby': describedBy, 'aria-invalid': error ? true : undefined })}
       {hint && !error && (
-        <p id={`${id}-hint`} className="mt-1 text-sm text-slate-600">
+        <p id={`${id}-hint`} className="mt-1 text-sm text-slate-700">
           {hint}
         </p>
       )}
@@ -37,7 +37,7 @@ export function Field({ label, error, hint, children }: FieldProps) {
 }
 
 const buttonBase =
-  'inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex min-h-12 items-center justify-center gap-2 px-4 py-2 text-sm font-medium uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50'
 
 const variants = {
   primary: 'bg-brand text-white enabled:hover:bg-accent',

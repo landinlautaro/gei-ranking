@@ -134,9 +134,9 @@ export function RulesPage() {
   useDocumentTitle('Reglamento')
   return (
     <div className="max-w-2xl">
-      <p className="text-sm font-medium text-slate-500">Versión {RULES_VERSION}</p>
+      <p className="text-sm font-medium text-slate-700">Versión {RULES_VERSION}</p>
       <h1 className="text-2xl font-bold">Reglamento – Ranking interno de tenis</h1>
-      <p className="mt-1 text-slate-600">Club Gimnasia y Esgrima de Ituzaingó (GEI) · Sistema de desafíos semanales</p>
+      <p className="mt-1 text-slate-700">Club Gimnasia y Esgrima de Ituzaingó (GEI) · Sistema de desafíos semanales</p>
 
       {SECTIONS.map((section, index) => (
         <section key={section.title} className="mt-6">
@@ -155,7 +155,7 @@ export function RulesPage() {
         </section>
       ))}
 
-      <p className="mt-8 text-sm font-medium text-slate-600">Coordinación de Tenis – GEI</p>
+      <p className="mt-8 text-sm font-medium text-slate-700">Coordinación de Tenis – GEI</p>
       <Link to="/" className="mt-4 inline-block text-brand hover:text-accent underline">Ver el ranking</Link>
     </div>
   )

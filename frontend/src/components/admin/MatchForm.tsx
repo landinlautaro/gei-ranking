@@ -168,7 +168,7 @@ export function MatchForm({ match }: MatchFormProps) {
               </>
             )}
           </div>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-700">
             Games por set: 6-0 a 6-4, 7-5 o 7-6 (con tie-break opcional). Si cada uno gana un set, el tercero es un Super Tie-Break a 10.
           </p>
           {serverErrors.score && <p className="text-sm text-red-700">{serverErrors.score}</p>}
@@ -271,7 +271,7 @@ function SetRow({ label, value, onChange, partial }: { label: string; value: Set
       )}
       {showTieBreak && (
         <>
-          <span className="text-slate-600">Tie-break</span>
+          <span className="text-slate-700">Tie-break</span>
           <ScoreInput label={`${label}: tie-break del desafiante`} value={value.tbC} onChange={(v) => onChange('tbC', v)} max={30} />
           <ScoreInput label={`${label}: tie-break del desafiado`} value={value.tbD} onChange={(v) => onChange('tbD', v)} max={30} />
         </>

@@ -44,7 +44,7 @@ export function AdjustmentPage() {
   return (
     <>
       <h1 className="text-2xl font-bold">Ajuste manual de posición</h1>
-      <p className="mt-1 max-w-prose text-slate-600">
+      <p className="mt-1 max-w-prose text-slate-700">
         Mueve a un jugador a otra posición y los demás se corren. Queda registrado en el historial con el motivo. Usalo para correcciones, no para
         cargar resultados.
       </p>

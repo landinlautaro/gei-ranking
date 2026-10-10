@@ -31,7 +31,7 @@ export function RankingPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar jugador…"
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand"
+          className="min-h-12 w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand"
         />
       </div>
 
@@ -45,7 +45,7 @@ export function RankingPage() {
           <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
             <table className="w-full text-left text-sm">
               <caption className="sr-only">Ranking de jugadores</caption>
-              <thead className="bg-slate-100 text-xs uppercase tracking-wide text-slate-600">
+              <thead className="bg-slate-100 text-sm uppercase tracking-wide text-slate-700">
                 <tr>
                   <th scope="col" className="py-2 pl-2 pr-1 text-right font-semibold sm:pl-3">
                     <abbr title="Posición" className="no-underline">Pos.</abbr>
@@ -75,7 +75,7 @@ export function RankingPage() {
                         <Avatar player={r.player} />
                         <span className="min-w-0">
                           <span className="block break-words font-medium leading-tight sm:truncate">{r.player.fullName}</span>
-                          {r.player.nickname && <span className="block break-words text-xs leading-tight text-slate-500 sm:truncate">“{r.player.nickname}”</span>}
+                          {r.player.nickname && <span className="block break-words text-sm leading-tight text-slate-700 sm:truncate">“{r.player.nickname}”</span>}
                         </span>
                       </Link>
                     </td>
