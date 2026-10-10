@@ -39,6 +39,17 @@ export function Layout() {
       <footer className="bg-surface px-4 py-6 text-center text-sm text-slate-700">
         Ranking interno de tenis · Club GEI ·{' '}
         <Link to="/admin" className="underline">Administración</Link>
+        <p className="mt-2">
+          Desarrollado por{' '}
+          <a
+            href="https://www.linkedin.com/in/lalandin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Lautaro Landin
+          </a>
+        </p>
       </footer>
     </div>
   )
