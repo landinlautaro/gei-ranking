@@ -86,6 +86,8 @@ export interface Paged<T> {
 
 export interface MatchFilters {
   playerId?: number
+  /** With `playerId`: only the matches between those two players. */
+  opponentId?: number
   from?: string
   to?: string
   page?: number

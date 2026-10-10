@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAdminPlayers, useCreateMatch, useMatchPreview, useUpdateMatch } from '../../api/admin'
 import type { AdminMatch, MatchChangeResult } from '../../api/adminTypes'
 import type { Completion } from '../../api/types'
+import { CHALLENGE_RANGE } from '../../lib/challenge'
 import { describeError, fieldErrors } from '../../lib/errors'
 import { isSevenSix, isValidSet, parseCount } from '../../lib/score'
 import { plural } from '../../lib/format'
@@ -13,7 +14,6 @@ import { emptyState, needsSuperTieBreak, stateFromMatch, toInput, type FormState
 import { MatchPreviewPanel } from './MatchPreviewPanel'
 
 const PREVIEW_DELAY_MS = 350
-const RANGE = 5
 
 const completions: { value: Completion; label: string }[] = [
   { value: 'Normal', label: 'Partido jugado' },
@@ -99,7 +99,7 @@ export function MatchForm({ match }: MatchFormProps) {
 
   const challengedHint =
     challengerPos !== null
-      ? `Puede desafiar del #${Math.max(1, challengerPos - RANGE)} al #${challengerPos - 1}.`
+      ? `Puede desafiar del #${Math.max(1, challengerPos - CHALLENGE_RANGE)} al #${challengerPos - 1}.`
       : 'Elegí primero al desafiante.'
 
   return (

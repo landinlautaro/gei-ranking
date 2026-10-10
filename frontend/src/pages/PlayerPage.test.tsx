@@ -1,5 +1,7 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { clearMe, getMe, setMe } from '../lib/meStore'
 import { match, mockApi, player, profile, rankingRow, renderApp } from '../test-utils'
 
 const juan = player(5, 'Juan Perez', 'Juancho')
@@ -93,6 +95,75 @@ describe('PlayerPage', () => {
     expect(await screen.findByText('Fuera del ranking')).toBeInTheDocument()
     expect(screen.getByText('Inactivo')).toBeInTheDocument()
     expect(screen.getByText(/No está en el ranking/)).toBeInTheDocument()
+  })
+
+  describe('con "Soy yo" elegido', () => {
+    afterEach(() => clearMe())
+
+    it('muestra el cara a cara contra el jugador que se mira', async () => {
+      setMe(5)
+      const { requests } = mockApi({
+        '/api/players/5': profile(juan, { position: 5 }),
+        '/api/players/3': profile(rival, { position: 3 }),
+        '/api/matches': (query: URLSearchParams) =>
+          query.get('opponentId')
+            ? {
+                items: [match(1, juan, rival, juan), match(2, rival, juan, rival), match(3, juan, rival, juan)],
+                total: 3,
+                page: 1,
+                pageSize: 100,
+              }
+            : { items: [], total: 0, page: 1, pageSize: 10 },
+      })
+      renderApp('/players/3')
+
+      const section = (await screen.findByRole('heading', { name: 'Vos vs Rival Tres' })).closest('section')!
+      expect(await within(section).findByText('Ganaste 2 · Perdiste 1')).toBeInTheDocument()
+      expect(within(section).getByText('Lo podés desafiar.')).toBeInTheDocument()
+      const h2h = requests.find((r) => r.query.get('opponentId'))!
+      expect(h2h.query.get('playerId')).toBe('5')
+      expect(h2h.query.get('opponentId')).toBe('3')
+    })
+
+    it('avisa cuando todavía no jugaron entre ellos y están fuera de rango', async () => {
+      setMe(5)
+      mockApi({
+        '/api/players/5': profile(juan, { position: 20 }),
+        '/api/players/9': profile(other, { position: 2 }),
+        '/api/matches': { items: [], total: 0, page: 1, pageSize: 100 },
+      })
+      renderApp('/players/9')
+
+      expect(await screen.findByText('Todavía no jugaron entre ustedes.')).toBeInTheDocument()
+      expect(screen.getByText(/Están a más de 5 puestos/)).toBeInTheDocument()
+    })
+
+    it('en el propio perfil no hay cara a cara', async () => {
+      setMe(5)
+      mockApi({
+        '/api/players/5': profile(juan),
+        '/api/matches': { items: [], total: 0, page: 1, pageSize: 10 },
+      })
+      renderApp('/players/5')
+
+      expect(await screen.findByText('✓ Este sos vos')).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: /Vos vs/ })).not.toBeInTheDocument()
+    })
+  })
+
+  it('"Soy yo" guarda la elección y no es el botón principal', async () => {
+    mockApi({
+      '/api/players/5': profile(juan),
+      '/api/matches': { items: [], total: 0, page: 1, pageSize: 10 },
+    })
+    renderApp('/players/5')
+
+    const button = await screen.findByRole('button', { name: 'Soy yo' })
+    expect(button).not.toHaveClass('bg-brand')
+    await userEvent.click(button)
+
+    expect(getMe()).toBe(5)
+    clearMe()
   })
 
   it('muestra un mensaje cuando el jugador no existe', async () => {
