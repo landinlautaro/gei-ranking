@@ -171,7 +171,7 @@ function MatchRow({ match, onVoid, voiding }: { match: AdminMatch; onVoid: () =>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Link
             to={`/admin/matches/${match.id}/edit`}
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100"
+            className="inline-flex min-h-12 items-center justify-center bg-brand px-4 py-2 text-sm font-medium uppercase text-white hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             aria-label={`Editar partido del ${formatDate(match.playedAt)} entre ${match.challenger.fullName} y ${match.challenged.fullName}`}
           >
             Editar
@@ -180,6 +180,7 @@ function MatchRow({ match, onVoid, voiding }: { match: AdminMatch; onVoid: () =>
             label="Anular"
             question="¿Anular este partido? El ranking se recalcula."
             confirmLabel="Sí, anular"
+            variant="danger"
             disabled={voiding}
             onConfirm={onVoid}
           />
