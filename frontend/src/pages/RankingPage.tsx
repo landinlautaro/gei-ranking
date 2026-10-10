@@ -20,21 +20,19 @@ export function RankingPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <h1 className="text-2xl font-bold">Ranking</h1>
-        <div className="sm:w-72">
-          <label htmlFor="search" className="sr-only">
-            Buscar jugador
-          </label>
-          <input
-            id="search"
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar jugador…"
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-600"
-          />
-        </div>
+      <h1 className="sr-only">Ranking</h1>
+      <div>
+        <label htmlFor="search" className="sr-only">
+          Buscar jugador
+        </label>
+        <input
+          id="search"
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar jugador…"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-600"
+        />
       </div>
 
       <div className="mt-4">

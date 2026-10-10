@@ -41,9 +41,9 @@ export function MatchesPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold">Partidos</h1>
+      <h1 className="sr-only">Partidos</h1>
 
-      <form className="mt-4 grid gap-3 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end" onSubmit={(e) => e.preventDefault()}>
+      <form className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end" onSubmit={(e) => e.preventDefault()}>
         <div>
           <label htmlFor="player" className="mb-1 block text-sm font-medium text-slate-700">Jugador</label>
           <select id="player" value={playerId ?? ''} onChange={(e) => update({ playerId: e.target.value })} className={fieldClass}>
