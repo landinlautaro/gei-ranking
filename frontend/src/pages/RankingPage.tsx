@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useRanking } from '../api/queries'
 import type { RankingRow } from '../api/types'
@@ -17,6 +17,21 @@ export function RankingPage() {
   const [search, setSearch] = useState('')
   const meId = useMe()
   const wide = useIsWide()
+  const [showMeRequested, setShowMeRequested] = useState(false)
+
+  // "Ver mi lugar": once the table lists everyone again, bring my row to the middle of the screen (one time only).
+  useEffect(() => {
+    if (!showMeRequested || !data || search !== '') return
+    setShowMeRequested(false)
+    const link = meId === null ? null : document.getElementById(`jugador-${meId}`)
+    link?.scrollIntoView?.({ block: 'center' })
+    link?.focus({ preventScroll: true })
+  }, [showMeRequested, data, search, meId])
+
+  const showMe = () => {
+    setSearch('')
+    setShowMeRequested(true)
+  }
 
   const rows = useMemo(() => {
     const term = normalizeText(search.trim())
@@ -27,7 +42,7 @@ export function RankingPage() {
   return (
     <>
       <h1 className="sr-only">Ranking</h1>
-      <MeCard />
+      <MeCard onShowMe={showMe} />
       <div className="mt-6">
         <label htmlFor="search" className="mb-1 block font-medium">
           Buscar jugador
@@ -80,7 +95,7 @@ export function RankingPage() {
                   <tr key={r.player.id} className={r.player.id === meId ? 'bg-sky-50' : 'hover:bg-slate-50'}>
                     <td className="py-2 pl-2 pr-1 text-right font-bold tabular-nums sm:pl-3">{r.position}</td>
                     <td className="w-full max-w-0 px-2 py-2 sm:px-3">
-                      <Link to={`/players/${r.player.id}`} className="flex items-center gap-2 hover:underline sm:gap-2.5">
+                      <Link id={`jugador-${r.player.id}`} to={`/players/${r.player.id}`} className="flex items-center gap-2 hover:underline sm:gap-2.5">
                         <Avatar player={r.player} />
                         <span className="min-w-0">
                           <span className="block break-words font-medium leading-tight sm:truncate">{r.player.fullName}{r.player.id === meId && ' (vos)'}</span>
@@ -115,6 +130,7 @@ function RankingList({ rows, meId }: { rows: RankingRow[]; meId: number | null }
       {rows.map((r) => (
         <li key={r.player.id}>
           <Link
+            id={`jugador-${r.player.id}`}
             to={`/players/${r.player.id}`}
             className={`flex min-h-16 items-center gap-3 rounded-lg border bg-white p-3 shadow-sm ${r.player.id === meId ? 'border-2 border-brand bg-sky-50' : 'border-slate-200'}`}
           >

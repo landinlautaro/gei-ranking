@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { avatarUri } from './avatar'
-import { formatDate, movementDescription, normalizeText, percentage, streakDescription } from './format'
+import { formatDate, movementDescription, normalizeText, ownMovementDescription, percentage, streakDescription } from './format'
 
 describe('formatDate', () => {
   it('muestra dd/mm/aaaa en la zona horaria del club', () => {
@@ -23,6 +23,9 @@ describe('descripciones', () => {
     expect(movementDescription(1)).toBe('Subió 1 puesto')
     expect(movementDescription(-2)).toBe('Bajó 2 puestos')
     expect(movementDescription(0)).toBe('Sin cambios de posición')
+    expect(ownMovementDescription(3)).toBe('Subiste 3 puestos en tu último cambio')
+    expect(ownMovementDescription(-1)).toBe('Bajaste 1 puesto en tu último cambio')
+    expect(ownMovementDescription(0)).toBe('Tu puesto no cambió')
   })
 
   it('describe la racha', () => {

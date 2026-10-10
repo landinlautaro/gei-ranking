@@ -29,6 +29,13 @@ export function movementDescription(movement: number): string {
   return 'Sin cambios de posición'
 }
 
+/** Second person, and says what the movement is measured against (the last change, not the week). */
+export function ownMovementDescription(movement: number): string {
+  if (movement > 0) return `Subiste ${plural(movement, 'puesto', 'puestos')} en tu último cambio`
+  if (movement < 0) return `Bajaste ${plural(-movement, 'puesto', 'puestos')} en tu último cambio`
+  return 'Tu puesto no cambió'
+}
+
 export function streakDescription(streak: number): string {
   if (streak > 0) return `${plural(streak, 'victoria', 'victorias')} seguidas`
   if (streak < 0) return `${plural(-streak, 'derrota', 'derrotas')} seguidas`

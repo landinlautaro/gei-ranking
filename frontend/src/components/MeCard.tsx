@@ -10,9 +10,9 @@ import { inputClass } from './ui'
 const cardClass = 'rounded-lg border-2 border-brand bg-white p-4 shadow-sm'
 
 /** Home-page card: pick your name once and every visit shows your position and who you can challenge. */
-export function MeCard() {
+export function MeCard({ onShowMe }: { onShowMe?: () => void }) {
   const meId = useMe()
-  return meId === null ? <PickPlayer /> : <MyStatus playerId={meId} />
+  return meId === null ? <PickPlayer /> : <MyStatus playerId={meId} onShowMe={onShowMe} />
 }
 
 function PickPlayer() {
@@ -36,7 +36,7 @@ function PickPlayer() {
   )
 }
 
-function MyStatus({ playerId }: { playerId: number }) {
+function MyStatus({ playerId, onShowMe }: { playerId: number; onShowMe?: () => void }) {
   const { data: player, error } = usePlayer(playerId)
   const gone = error instanceof ApiError && error.status === 404
 
@@ -74,6 +74,7 @@ function MyStatus({ playerId }: { playerId: number }) {
                 className="flex min-h-12 items-center gap-3 rounded-lg border border-slate-300 bg-white px-3 py-2 text-lg hover:bg-slate-50"
               >
                 <span className="w-10 text-right font-black tabular-nums">{c.position}</span>
+                <Avatar player={c.player} size="sm" />
                 <span className="min-w-0 break-words">{c.player.fullName}</span>
               </Link>
             </li>
@@ -89,6 +90,15 @@ function MyStatus({ playerId }: { playerId: number }) {
         <Link to={`/players/${playerId}`} className="inline-flex min-h-12 items-center bg-brand px-5 text-sm font-medium uppercase text-white hover:bg-accent">
           Ver mi perfil completo
         </Link>
+        {onShowMe && player.position !== null && (
+          <button
+            type="button"
+            onClick={onShowMe}
+            className="inline-flex min-h-12 items-center border border-brand px-5 text-sm font-medium uppercase text-brand hover:bg-slate-50"
+          >
+            Ver mi lugar en la tabla
+          </button>
+        )}
         <button type="button" onClick={clearMe} className="min-h-12 text-brand underline hover:text-accent">
           No soy {player.nickname ?? player.fullName}
         </button>
