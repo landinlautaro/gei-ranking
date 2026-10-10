@@ -8,6 +8,8 @@ import { describeError, fieldErrors } from '../../lib/errors'
 import { isSevenSix, isValidSet, parseCount } from '../../lib/score'
 import { plural } from '../../lib/format'
 import { useDebouncedValue } from '../../lib/useDebouncedValue'
+import { matchMessage } from '../../lib/whatsapp'
+import { CopyButton } from '../CopyButton'
 import { ErrorState, LoadingState } from '../PageState'
 import { Button, Field, inputClass, Notice } from '../ui'
 import { emptyState, needsSuperTieBreak, stateFromMatch, toInput, type FormState, type SetFields } from './matchFormModel'
@@ -298,6 +300,7 @@ function SavedPanel({ result, editing, onAnother }: { result: MatchChangeResult;
           <Link to="/admin/matches?withWarnings=true" className="underline">Partidos con advertencias</Link>.
         </Notice>
       )}
+      <CopyButton label="Copiar para WhatsApp" variant="secondary" getText={() => matchMessage(match)} />
       <div className="flex flex-wrap gap-3">
         {!editing && <Button onClick={onAnother}>Cargar otro resultado</Button>}
         <Link to="/admin/matches" className="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100">

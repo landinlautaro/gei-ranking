@@ -177,6 +177,24 @@ describe('Cargar resultado', () => {
     expect(screen.getByLabelText('Fecha del partido')).toHaveValue('2026-03-10')
   })
 
+  it('tras guardar permite copiar el resultado para WhatsApp', async () => {
+    const writeText = vi.fn(async () => {})
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    mockApi(routes())
+    renderApp('/admin/results/new')
+    await fillNormalMatch()
+    const save = screen.getByRole('button', { name: 'Guardar resultado' })
+    await waitFor(() => expect(save).toBeEnabled())
+    await userEvent.click(save)
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Copiar para WhatsApp' }))
+
+    expect(writeText).toHaveBeenCalledWith(
+      '🎾 *Resultado*\nBeto Ruiz le ganó a Ana Gómez 6-4 6-3\nBeto Ruiz pasa del #5 al #3; Ana Gómez baja del #3 al #5',
+    )
+    expect(await screen.findByText('¡Copiado!')).toBeInTheDocument()
+  })
+
   it('un desafío fuera de rango exige confirmar antes de guardar', async () => {
     const { requests } = mockApi(routes({
       'POST /api/admin/matches/preview': preview({ warning: 'OutOfRange', requiresOutOfRangeConfirmation: true }),

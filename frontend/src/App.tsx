@@ -17,7 +17,8 @@ const AdminMatchesPage = lazy(() => import('./pages/admin/AdminMatchesPage').the
 const AdminPlayersPage = lazy(() => import('./pages/admin/AdminPlayersPages').then((m) => ({ default: m.AdminPlayersPage })))
 const NewPlayerPage = lazy(() => import('./pages/admin/AdminPlayersPages').then((m) => ({ default: m.NewPlayerPage })))
 const EditPlayerPage = lazy(() => import('./pages/admin/AdminPlayersPages').then((m) => ({ default: m.EditPlayerPage })))
-const AdjustmentPage = lazy(() => import('./pages/admin/AdjustmentPage').then((m) => ({ default: m.AdjustmentPage })))
+const SharePage = lazy(() => import('./pages/admin/SharePage').then((m) => ({ default: m.SharePage })))
+const AdjustmentPage =lazy(() => import('./pages/admin/AdjustmentPage').then((m) => ({ default: m.AdjustmentPage })))
 
 const loading = <LoadingState label="Cargando…" />
 
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="players" element={<AdminPlayersPage />} />
         <Route path="players/new" element={<NewPlayerPage />} />
         <Route path="players/:id" element={<EditPlayerPage />} />
+        <Route path="share" element={<SharePage />} />
         <Route path="adjustments" element={<AdjustmentPage />} />
       </Route>
     </Routes>
