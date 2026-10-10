@@ -25,7 +25,7 @@ export function PlayerPage() {
           {error instanceof ApiError && error.status === 404 ? 'Jugador no encontrado' : 'No se pudo cargar el jugador'}
         </h1>
         <ErrorState error={error ?? new Error('No encontramos a ese jugador.')} onRetry={error ? () => void refetch() : undefined} />
-        <Link to="/" className="text-sky-700 underline">Volver al ranking</Link>
+        <Link to="/" className="text-brand hover:text-accent underline">Volver al ranking</Link>
       </div>
     )
   }
@@ -39,7 +39,7 @@ export function PlayerPage() {
 
   return (
     <div className="space-y-8">
-      <Link to="/" className="text-sm text-sky-700 underline">← Ranking</Link>
+      <Link to="/" className="text-sm text-brand hover:text-accent underline">← Ranking</Link>
 
       <header className="flex items-center gap-4">
         <Avatar player={player} size="lg" />
@@ -123,7 +123,7 @@ export function PlayerPage() {
                 ))}
               </ul>
               {matches.data.total > RECENT_MATCHES && (
-                <Link to={`/matches?playerId=${id}`} className="mt-3 inline-block text-sky-700 underline">
+                <Link to={`/matches?playerId=${id}`} className="mt-3 inline-block text-brand hover:text-accent underline">
                   Ver los {matches.data.total} partidos
                 </Link>
               )}

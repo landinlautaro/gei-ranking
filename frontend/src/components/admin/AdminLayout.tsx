@@ -8,8 +8,8 @@ import { SkipLink } from '../SkipLink'
 import { Button } from '../ui'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  `whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 ${
-    isActive ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-200'
+  `whitespace-nowrap px-3 py-2 text-[0.8125rem] uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+    isActive ? 'font-extrabold text-brand' : 'font-medium text-black hover:text-brand'
   }`
 
 /** Gate for everything under /admin: without a session you go to the login; a rejected token ends the session. */
@@ -31,11 +31,11 @@ export function AdminLayout() {
       <SkipLink />
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
-          <Link to="/admin/results/new" className="text-lg font-bold tracking-tight">
-            Ranking GEI <span className="text-sm font-medium text-slate-500">· Administración</span>
+          <Link to="/admin/results/new" className="text-lg font-black uppercase tracking-tight text-brand">
+            Ranking GEI <span className="text-sm font-medium normal-case text-slate-700">· Administración</span>
           </Link>
           <div className="flex items-center gap-3 text-sm">
-            <Link to="/" className="text-sky-700 underline">Ver sitio público</Link>
+            <Link to="/" className="text-brand hover:text-accent underline">Ver sitio público</Link>
             <span className="text-slate-600">{session.username}</span>
             <Button variant="secondary" className="!px-3 !py-1.5" onClick={() => clearSession()}>
               Salir

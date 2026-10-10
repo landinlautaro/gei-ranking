@@ -34,7 +34,7 @@ export function AdminPlayersPage() {
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Jugadores</h1>
-        <Link to="/admin/players/new" className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
+        <Link to="/admin/players/new" className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-accent">
           Nuevo jugador
         </Link>
       </div>
@@ -59,7 +59,7 @@ export function AdminPlayersPage() {
                     {p.nickname && <span className="block truncate text-xs text-slate-500">“{p.nickname}”</span>}
                   </span>
                   {!p.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">Inactivo</span>}
-                  <span className="text-sm text-sky-700">Editar</span>
+                  <span className="text-sm text-brand hover:text-accent">Editar</span>
                 </Link>
               </li>
             ))}
@@ -80,7 +80,7 @@ export function NewPlayerPage() {
 
   return (
     <>
-      <Link to="/admin/players" className="text-sm text-sky-700 underline">← Jugadores</Link>
+      <Link to="/admin/players" className="text-sm text-brand hover:text-accent underline">← Jugadores</Link>
       <h1 className="mb-4 mt-2 text-2xl font-bold">Nuevo jugador</h1>
       <PlayerForm
         submitLabel="Crear jugador"
@@ -108,7 +108,7 @@ export function EditPlayerPage() {
 
   return (
     <>
-      <Link to="/admin/players" className="text-sm text-sky-700 underline">← Jugadores</Link>
+      <Link to="/admin/players" className="text-sm text-brand hover:text-accent underline">← Jugadores</Link>
       {!valid && <ErrorState error={new Error('Jugador inválido.')} />}
       {valid && isPending && <LoadingState label="Cargando jugador…" />}
       {valid && isError && <ErrorState error={error} onRetry={() => void refetch()} />}
@@ -237,7 +237,7 @@ function PhotoSection({ player }: { player: AdminPlayer }) {
                 key={inputKey}
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white"
+                className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-brand file:px-3 file:py-2 file:text-sm file:font-medium file:text-white"
                 disabled={upload.isPending}
                 onChange={(e) => {
                   const file = e.target.files?.[0]

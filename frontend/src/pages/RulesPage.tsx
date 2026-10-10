@@ -156,7 +156,7 @@ export function RulesPage() {
       ))}
 
       <p className="mt-8 text-sm font-medium text-slate-600">Coordinación de Tenis – GEI</p>
-      <Link to="/" className="mt-4 inline-block text-sky-700 underline">Ver el ranking</Link>
+      <Link to="/" className="mt-4 inline-block text-brand hover:text-accent underline">Ver el ranking</Link>
     </div>
   )
 }

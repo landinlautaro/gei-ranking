@@ -132,8 +132,8 @@ export function MatchForm({ match }: MatchFormProps) {
             {completions.map((c) => (
               <label
                 key={c.value}
-                className={`cursor-pointer rounded-md border px-3 py-2 text-sm font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-sky-600 ${
-                  state.completion === c.value ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white hover:bg-slate-100'
+                className={`cursor-pointer rounded-md border px-3 py-2 text-sm font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand ${
+                  state.completion === c.value ? 'border-brand bg-brand text-white' : 'border-slate-300 bg-white hover:bg-slate-100'
                 }`}
               >
                 <input
@@ -182,8 +182,8 @@ export function MatchForm({ match }: MatchFormProps) {
             {(['Challenger', 'Challenged'] as const).map((side) => (
               <label
                 key={side}
-                className={`cursor-pointer rounded-md border px-3 py-2 text-sm font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-sky-600 ${
-                  state.winner === side ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white hover:bg-slate-100'
+                className={`cursor-pointer rounded-md border px-3 py-2 text-sm font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand ${
+                  state.winner === side ? 'border-brand bg-brand text-white' : 'border-slate-300 bg-white hover:bg-slate-100'
                 }`}
               >
                 <input
@@ -230,7 +230,7 @@ export function MatchForm({ match }: MatchFormProps) {
         <Button type="submit" disabled={!canSave}>
           {mutation.isPending ? 'Guardando…' : editing ? 'Guardar cambios' : 'Guardar resultado'}
         </Button>
-        {editing && <Link to="/admin/matches" className="text-sm text-sky-700 underline">Cancelar</Link>}
+        {editing && <Link to="/admin/matches" className="text-sm text-brand hover:text-accent underline">Cancelar</Link>}
       </div>
     </form>
   )

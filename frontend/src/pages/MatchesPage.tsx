@@ -7,7 +7,7 @@ import { useDocumentTitle } from '../lib/useDocumentTitle'
 const PAGE_SIZE = 20
 
 const fieldClass =
-  'w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-600'
+  'w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand'
 
 export function MatchesPage() {
   useDocumentTitle('Partidos')
@@ -67,7 +67,7 @@ export function MatchesPage() {
           <button
             type="button"
             onClick={() => setParams(new URLSearchParams())}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-600"
+            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand"
           >
             Limpiar filtros
           </button>

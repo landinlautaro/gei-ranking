@@ -68,7 +68,7 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <Link to="/" className="mt-6 text-center text-sm text-sky-700 underline">Volver al ranking</Link>
+      <Link to="/" className="mt-6 text-center text-sm text-brand hover:text-accent underline">Volver al ranking</Link>
     </main>
   )
 }

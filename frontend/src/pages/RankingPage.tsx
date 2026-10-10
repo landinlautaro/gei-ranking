@@ -31,7 +31,7 @@ export function RankingPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar jugador…"
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-600"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand"
         />
       </div>
 

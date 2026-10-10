@@ -22,7 +22,7 @@ export function EditMatchPage() {
 
   return (
     <>
-      <Link to="/admin/matches" className="text-sm text-sky-700 underline">← Partidos</Link>
+      <Link to="/admin/matches" className="text-sm text-brand hover:text-accent underline">← Partidos</Link>
       <h1 className="mb-4 mt-2 text-2xl font-bold">Editar partido</h1>
       {!valid && <ErrorState error={new Error('Partido inválido.')} />}
       {valid && isPending && <LoadingState label="Cargando partido…" />}

@@ -1,5 +1,32 @@
 @import "tailwindcss";
+@import "@fontsource-variable/raleway";
+
+/* Design tokens: identidad visual del Club GEI (valores tomados de clubgei.com.ar, css/min/style.min.css). */
+@theme {
+  --font-sans: "Raleway Variable", "Raleway", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: #006fa9; /* azul primario: botones, títulos de sección, hover de links */
+  --color-brand-dark: #005a89; /* variante para hover/texto sobre fondos claros (derivada, mismo matiz) */
+  --color-accent: #e4ac2d; /* dorado: hover de botones y links */
+  --color-surface: #e1e2e6; /* gris del footer y de las secciones */
+  --color-ink: #000000; /* texto */
+}
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-slate-50 font-sans text-ink antialiased;
+}
+
+h1,
+h2,
+h3 {
+  @apply font-black;
+}
+
+/* Títulos de sección: azul y en negrita, como `.title-section` del sitio. */
+h1 {
+  @apply text-brand;
+}
+
+a {
+  transition: color 0.3s, background-color 0.3s;
 }
