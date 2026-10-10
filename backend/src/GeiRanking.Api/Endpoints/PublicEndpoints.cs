@@ -105,6 +105,7 @@ public static class PublicEndpoints
         AppDbContext db,
         CancellationToken ct,
         int? playerId = null,
+        int? opponentId = null,
         DateOnly? from = null,
         DateOnly? to = null,
         int page = 1,
@@ -123,11 +124,21 @@ public static class PublicEndpoints
             return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["from"] = ["from must not be after to."] });
         }
 
+        if (opponentId is not null && (playerId is null || playerId == opponentId))
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["opponentId"] = ["opponentId requires a playerId different from it."],
+            });
+        }
+
         var query = db.Matches.AsNoTracking().Where(m => m.Status == MatchStatus.Valid);
 
         if (playerId is { } pid)
         {
-            query = query.Where(m => m.ChallengerId == pid || m.ChallengedId == pid);
+            query = opponentId is { } oid
+                ? query.Where(m => (m.ChallengerId == pid && m.ChallengedId == oid) || (m.ChallengerId == oid && m.ChallengedId == pid))
+                : query.Where(m => m.ChallengerId == pid || m.ChallengedId == pid);
         }
 
         if (from is { } f)

@@ -192,6 +192,22 @@ public class PublicEndpointsTests(PostgresFixture fixture) : IClassFixture<Postg
     }
 
     [Fact]
+    public async Task Matches_CanBeFilteredByHeadToHead()
+    {
+        await _ladder.InitAsync(10);
+        await _ladder.AddMatchAsync(8, 6, 8);
+        await _ladder.AddMatchAsync(6, 8, 8);
+        await _ladder.AddMatchAsync(8, 5, 8);
+
+        var page = await GetAsync<PagedDto<MatchDto>>($"/api/matches?playerId={_ladder.Ids[7]}&opponentId={_ladder.Ids[5]}");
+
+        Assert.Equal(2, page!.Total);
+        Assert.All(page.Items, m => Assert.True(
+            (m.Challenger.Id == _ladder.Ids[7] && m.Challenged.Id == _ladder.Ids[5]) ||
+            (m.Challenger.Id == _ladder.Ids[5] && m.Challenged.Id == _ladder.Ids[7])));
+    }
+
+    [Fact]
     public async Task Matches_CanBeFilteredByClubLocalDateRange_Inclusive()
     {
         await _ladder.InitAsync(10);
@@ -232,6 +248,8 @@ public class PublicEndpointsTests(PostgresFixture fixture) : IClassFixture<Postg
     [InlineData("/api/matches?pageSize=0")]
     [InlineData("/api/matches?pageSize=101")]
     [InlineData("/api/matches?from=2026-03-12&to=2026-03-10")]
+    [InlineData("/api/matches?opponentId=3")]
+    [InlineData("/api/matches?playerId=3&opponentId=3")]
     public async Task Matches_InvalidQuery_IsBadRequest(string url)
     {
         var response = await _client.GetAsync(url);
