@@ -4,15 +4,18 @@ import { useMatches, usePlayer } from '../api/queries'
 import { Avatar } from '../components/Avatar'
 import { MatchCard } from '../components/MatchCard'
 import { MovementBadge } from '../components/MovementBadge'
+import { Button } from '../components/ui'
 import { ErrorState, LoadingState } from '../components/PageState'
 import { PositionChart } from '../components/PositionChart'
 import { backhandLabel, formatDate, handLabel, percentage, streakDescription } from '../lib/format'
+import { clearMe, setMe, useMe } from '../lib/meStore'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 const RECENT_MATCHES = 10
 
 export function PlayerPage() {
   const id = Number(useParams().id)
+  const meId = useMe()
   const { data: player, isPending, isError, error, refetch } = usePlayer(id)
   const matches = useMatches({ playerId: id, pageSize: RECENT_MATCHES }, Number.isInteger(id) && id > 0)
   useDocumentTitle(player?.fullName)
@@ -60,23 +63,17 @@ export function PlayerPage() {
         </div>
       </header>
 
-      <p className="text-sm text-slate-700">{details.join(' · ')}</p>
+      {player.isActive &&
+        (meId === player.id ? (
+          <p className="flex flex-wrap items-center gap-x-4 gap-y-1 font-medium">
+            ✓ Este sos vos
+            <button type="button" onClick={clearMe} className="min-h-12 text-brand underline hover:text-accent">No soy yo</button>
+          </p>
+        ) : (
+          <Button onClick={() => setMe(player.id)}>Este soy yo</Button>
+        ))}
 
-      <section aria-labelledby="stats-title">
-        <h2 id="stats-title" className="text-lg font-semibold">Estadísticas</h2>
-        <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <Stat label="Partidos jugados" value={stats.played} />
-          <Stat label="Ganados" value={stats.wins} />
-          <Stat label="Perdidos" value={stats.losses} />
-          <Stat label="% de victorias" value={percentage(stats.winPercentage)} />
-          <Stat label="Racha actual" value={streakDescription(stats.currentStreak)} small />
-          <Stat label="Desafíos ganados" value={stats.challengesWon} />
-          <Stat label="Desafíos perdidos" value={stats.challengesLost} />
-          <Stat label="Defensas ganadas" value={stats.defensesWon} />
-          <Stat label="Defensas perdidas" value={stats.defensesLost} />
-          <Stat label="Mejor posición" value={player.bestPosition === null ? '—' : `#${player.bestPosition}`} />
-        </dl>
-      </section>
+      <p className="text-sm text-slate-700">{details.join(' · ')}</p>
 
       <section aria-labelledby="challenge-title">
         <h2 id="challenge-title" className="text-lg font-semibold">A quiénes puede desafiar hoy</h2>
@@ -100,6 +97,22 @@ export function PlayerPage() {
             {player.position === 1 ? 'Es el número uno: no hay nadie por encima para desafiar.' : 'No está en el ranking, así que no puede desafiar.'}
           </p>
         )}
+      </section>
+
+      <section aria-labelledby="stats-title">
+        <h2 id="stats-title" className="text-lg font-semibold">Estadísticas</h2>
+        <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <Stat label="Partidos jugados" value={stats.played} />
+          <Stat label="Ganados" value={stats.wins} />
+          <Stat label="Perdidos" value={stats.losses} />
+          <Stat label="% de victorias" value={percentage(stats.winPercentage)} />
+          <Stat label="Racha actual" value={streakDescription(stats.currentStreak)} small />
+          <Stat label="Desafíos ganados" value={stats.challengesWon} />
+          <Stat label="Desafíos perdidos" value={stats.challengesLost} />
+          <Stat label="Defensas ganadas" value={stats.defensesWon} />
+          <Stat label="Defensas perdidas" value={stats.defensesLost} />
+          <Stat label="Mejor posición" value={player.bestPosition === null ? '—' : `#${player.bestPosition}`} />
+        </dl>
       </section>
 
       <section aria-labelledby="chart-title">
@@ -138,7 +151,7 @@ export function PlayerPage() {
 function Stat({ label, value, small = false }: { label: string; value: React.ReactNode; small?: boolean }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-      <dt className="text-sm text-slate-700">{label}</dt>
+      <dt className="text-base text-slate-700">{label}</dt>
       <dd className={`mt-1 font-bold tabular-nums ${small ? 'text-base' : 'text-2xl'}`}>{value}</dd>
     </div>
   )

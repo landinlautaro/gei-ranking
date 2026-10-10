@@ -7,12 +7,12 @@ function PlayerLink({ player, isWinner }: { player: PlayerRef; isWinner: boolean
   return (
     <Link
       to={`/players/${player.id}`}
-      className={`inline-flex items-center gap-2 hover:underline ${isWinner ? 'font-semibold text-slate-900' : 'text-slate-700'}`}
+      className={`inline-flex items-center gap-2 hover:underline ${isWinner ? 'font-bold text-slate-900' : 'text-slate-700'}`}
     >
       <Avatar player={player} size="sm" />
       <span>
         {player.fullName}
-        {isWinner && <span className="sr-only"> (ganador)</span>}
+        {isWinner && <span className="ml-2 rounded bg-green-100 px-2 py-0.5 text-sm font-semibold text-green-800">Ganó</span>}
       </span>
     </Link>
   )
@@ -40,7 +40,7 @@ export function MatchCard({ match, perspectiveId }: MatchCardProps) {
     <li className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
       <div className="flex items-baseline justify-between gap-3 text-sm">
         <span className="text-slate-700">{formatDate(match.playedAt)}</span>
-        <span className="font-mono font-semibold text-slate-900">{match.result}</span>
+        <span className="text-lg font-bold text-slate-900">{match.result}</span>
       </div>
 
       {perspectiveId === undefined ? (
@@ -52,7 +52,7 @@ export function MatchCard({ match, perspectiveId }: MatchCardProps) {
       ) : (
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
           <span
-            className={`rounded px-2 py-0.5 text-sm font-semibold ${won ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+            className={`rounded px-2 py-0.5 text-base font-semibold ${won ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
           >
             {won ? 'Ganó' : 'Perdió'}
           </span>

@@ -28,7 +28,7 @@ describe('MatchesPage', () => {
     expect(item).toHaveTextContent('Ana Gómez')
     expect(item).toHaveTextContent('Beto Ruiz pasa del #5 al #3')
     expect(item).toHaveTextContent('Se jugó con lluvia')
-    expect(screen.getByRole('link', { name: /Beto Ruiz\s*\(ganador\)/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Beto Ruiz\s*Ganó/ })).toBeInTheDocument()
   })
 
   it('lee los filtros de la URL y los manda a la API', async () => {
