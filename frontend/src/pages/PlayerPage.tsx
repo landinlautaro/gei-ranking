@@ -4,6 +4,7 @@ import { useMatches, usePlayer } from '../api/queries'
 import { Avatar } from '../components/Avatar'
 import { MatchCard } from '../components/MatchCard'
 import { MovementBadge } from '../components/MovementBadge'
+import { ShareButton } from '../components/ShareButton'
 import { Button } from '../components/ui'
 import { ErrorState, LoadingState } from '../components/PageState'
 import { PositionChart } from '../components/PositionChart'
@@ -79,6 +80,10 @@ export function PlayerPage() {
           ) : (
             <Button variant="secondary" onClick={() => setMe(player.id)}>Soy yo</Button>
           ))}
+      </div>
+
+      <div>
+        <ShareButton label="Compartir perfil" title={`${player.fullName} · Ranking GEI`} />
       </div>
 
       {meId !== null && meId !== player.id && <HeadToHead meId={meId} rival={player} />}

@@ -6,6 +6,7 @@ import { Avatar } from '../components/Avatar'
 import { MeCard } from '../components/MeCard'
 import { MovementBadge } from '../components/MovementBadge'
 import { EmptyState, ErrorState, LoadingState } from '../components/PageState'
+import { ShareButton } from '../components/ShareButton'
 import { normalizeText } from '../lib/format'
 import { useMe } from '../lib/meStore'
 import { useIsWide } from '../lib/useIsWide'
@@ -116,6 +117,12 @@ export function RankingPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {rows.length > 0 && (
+          <div className="mt-6">
+            <ShareButton label="Compartir ranking" title="Ranking GEI" />
           </div>
         )}
       </div>
