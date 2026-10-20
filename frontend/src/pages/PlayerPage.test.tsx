@@ -24,17 +24,38 @@ describe('PlayerPage', () => {
     expect(screen.getByText('“Juancho”')).toBeInTheDocument()
     expect(screen.getByText('Puesto #5')).toBeInTheDocument()
     expect(screen.getByText('Subió 3 puestos')).toBeInTheDocument()
-    expect(screen.getByText(/Zurdo · Revés a dos manos · En el club desde 01\/01\/2026/)).toBeInTheDocument()
+    const details = within(screen.getByRole('list', { name: 'Datos del jugador' }))
+    expect(details.getByText('Zurdo')).toBeInTheDocument()
+    expect(details.getByText('Revés a dos manos')).toBeInTheDocument()
+    expect(details.getByText('En el club desde 01/01/2026')).toBeInTheDocument()
 
     const stat = (label: string) => screen.getByText(label).closest('div')!
     expect(within(stat('% de victorias')).getByText('75%')).toBeInTheDocument()
-    expect(within(stat('Racha actual')).getByText('2 victorias seguidas')).toBeInTheDocument()
+    expect(within(stat('% de victorias')).getByText('3/4')).toBeInTheDocument()
+    expect(screen.queryByText(/Pocos partidos/)).not.toBeInTheDocument()
+    expect(stat('Racha actual')).toHaveTextContent('2 victorias seguidas')
     expect(within(stat('Mejor posición')).getByText('#4')).toBeInTheDocument()
-    expect(within(stat('Defensas ganadas')).getByText('1')).toBeInTheDocument()
+    expect(within(stat('Desafíos')).getByText('2-1')).toBeInTheDocument()
+    expect(within(stat('Defensas')).getByText('1-0')).toBeInTheDocument()
+    expect(screen.queryByText('Ganados')).not.toBeInTheDocument()
+    expect(screen.queryByText('Perdidos')).not.toBeInTheDocument()
 
     const challenge = screen.getByRole('heading', { name: 'A quiénes puede desafiar hoy' }).closest('section')!
     expect(within(challenge).getByRole('link', { name: /Rival Tres/ })).toHaveAttribute('href', '/players/3')
     expect(within(challenge).getAllByRole('listitem')).toHaveLength(2)
+  })
+
+  it('con menos de 3 partidos muestra la fracción y avisa que son pocos', async () => {
+    const base = profile(juan)
+    mockApi({
+      '/api/players/5': { ...base, stats: { ...base.stats, played: 1, wins: 1, losses: 0, winPercentage: 100 } },
+      '/api/matches': { items: [], total: 0, page: 1, pageSize: 10 },
+    })
+    renderApp('/players/5')
+
+    const card = (await screen.findByText('% de victorias')).closest('div')!
+    expect(within(card).getByText('100%')).toHaveClass('text-slate-600')
+    expect(within(card).getByText('1/1 · Pocos partidos')).toBeInTheDocument()
   })
 
   it('cuenta los partidos desde el punto de vista del jugador', async () => {
@@ -151,14 +172,14 @@ describe('PlayerPage', () => {
     })
   })
 
-  it('"Soy yo" guarda la elección y no es el botón principal', async () => {
+  it('"Este es mi perfil" guarda la elección y no es el botón principal', async () => {
     mockApi({
       '/api/players/5': profile(juan),
       '/api/matches': { items: [], total: 0, page: 1, pageSize: 10 },
     })
     renderApp('/players/5')
 
-    const button = await screen.findByRole('button', { name: 'Soy yo' })
+    const button = await screen.findByRole('button', { name: 'Este es mi perfil' })
     expect(button).not.toHaveClass('bg-brand')
     await userEvent.click(button)
 

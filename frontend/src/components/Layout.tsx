@@ -4,8 +4,8 @@ import { useFocusMainOnNavigation } from '../lib/useFocusMain'
 import { SkipLink } from './SkipLink'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  `inline-flex min-h-12 items-center px-3 text-sm uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-    isActive ? 'font-extrabold text-brand underline decoration-2 underline-offset-8' : 'font-medium text-black hover:text-brand'
+  `inline-flex min-h-12 items-center border-b-4 px-3 text-sm uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+    isActive ? 'border-brand bg-sky-50 font-extrabold text-brand-dark' : 'border-transparent font-medium text-black hover:bg-slate-100 hover:text-brand-dark'
   }`
 
 export function Layout() {
@@ -16,11 +16,11 @@ export function Layout() {
     <div className="flex min-h-dvh flex-col">
       <SkipLink />
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-          <Link to="/" className="text-lg font-black uppercase tracking-tight text-brand">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 pt-3">
+          <Link to="/" className="pb-2 text-lg font-black uppercase tracking-tight text-brand sm:pb-3">
             Ranking GEI
           </Link>
-          <nav aria-label="Principal" className="flex gap-1">
+          <nav aria-label="Principal" className="-mx-3 flex sm:mx-0 sm:gap-1">
             <NavLink to="/" end className={navClass}>
               Ranking
             </NavLink>

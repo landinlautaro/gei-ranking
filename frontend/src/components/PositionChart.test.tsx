@@ -84,6 +84,44 @@ describe('PositionChart', () => {
     expect(screen.getByText('Fuera del ranking')).toBeInTheDocument()
   })
 
+  const history = [
+    { at: '2026-01-01T12:00:00Z', position: 8 },
+    { at: '2026-02-01T12:00:00Z', position: 5 },
+    { at: '2026-03-01T12:00:00Z', position: 6 },
+  ]
+  const tableDates = () =>
+    within(screen.getByRole('table'))
+      .getAllByRole('row')
+      .slice(1)
+      .map((r) => r.textContent)
+
+  it('empieza en la fecha de ingreso del jugador, con la posición que tenía ese día', () => {
+    render(<PositionChart until={until} from={new Date('2026-01-15T12:00:00Z')} points={history} />)
+
+    expect(tableDates()).toEqual(['15/01/2026#8', '01/02/2026#5', '01/03/2026#6'])
+  })
+
+  it('no empieza antes del primer registro aunque el ingreso sea anterior', () => {
+    render(<PositionChart until={until} from={new Date('2025-06-01T12:00:00Z')} points={history} />)
+
+    expect(tableDates()).toEqual(['01/01/2026#8', '01/02/2026#5', '01/03/2026#6'])
+  })
+
+  it('filtra por 1 mes, 3 meses y Todo', () => {
+    render(<PositionChart until={until} points={history} />)
+    expect(screen.getByRole('button', { name: 'Todo' })).toHaveAttribute('aria-pressed', 'true')
+
+    fireEvent.click(screen.getByRole('button', { name: '1 mes' }))
+    expect(screen.getByRole('button', { name: '1 mes' })).toHaveAttribute('aria-pressed', 'true')
+    expect(tableDates()).toEqual(['01/03/2026#6'])
+
+    fireEvent.click(screen.getByRole('button', { name: '3 meses' }))
+    expect(tableDates()).toEqual(['01/01/2026#8', '01/02/2026#5', '01/03/2026#6'])
+
+    fireEvent.click(screen.getByRole('button', { name: 'Todo' }))
+    expect(tableDates()).toHaveLength(3)
+  })
+
   it('sin historial muestra un aviso', () => {
     render(<PositionChart points={[]} />)
 

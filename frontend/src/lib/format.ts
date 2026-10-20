@@ -37,8 +37,8 @@ export function ownMovementDescription(movement: number): string {
 }
 
 export function streakDescription(streak: number): string {
-  if (streak > 0) return `${plural(streak, 'victoria', 'victorias')} seguidas`
-  if (streak < 0) return `${plural(-streak, 'derrota', 'derrotas')} seguidas`
+  if (streak > 0) return plural(streak, 'victoria seguida', 'victorias seguidas')
+  if (streak < 0) return plural(-streak, 'derrota seguida', 'derrotas seguidas')
   return '—'
 }
 

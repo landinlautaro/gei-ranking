@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useMatches, usePlayers } from '../api/queries'
 import { MatchCard } from '../components/MatchCard'
 import { EmptyState, ErrorState, LoadingState } from '../components/PageState'
+import { Button } from '../components/ui'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 const PAGE_SIZE = 20
@@ -64,13 +65,9 @@ export function MatchesPage() {
           </div>
         </div>
         {hasFilters && (
-          <button
-            type="button"
-            onClick={() => setParams(new URLSearchParams())}
-            className="min-h-12 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand"
-          >
+          <Button variant="secondary" onClick={() => setParams(new URLSearchParams())}>
             Limpiar filtros
-          </button>
+          </Button>
         )}
       </form>
 
@@ -97,23 +94,13 @@ export function MatchesPage() {
             </ul>
             {totalPages > 1 && (
               <nav aria-label="Paginación" className="mt-4 flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  disabled={page <= 1}
-                  onClick={() => update({ page: String(page - 1) })}
-                  className="min-h-12 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium enabled:hover:bg-slate-100 disabled:opacity-40"
-                >
+                <Button variant="secondary" disabled={page <= 1} onClick={() => update({ page: String(page - 1) })}>
                   ← Anterior
-                </button>
+                </Button>
                 <span className="text-sm text-slate-700">Página {page} de {totalPages}</span>
-                <button
-                  type="button"
-                  disabled={page >= totalPages}
-                  onClick={() => update({ page: String(page + 1) })}
-                  className="min-h-12 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium enabled:hover:bg-slate-100 disabled:opacity-40"
-                >
+                <Button variant="secondary" disabled={page >= totalPages} onClick={() => update({ page: String(page + 1) })}>
                   Siguiente →
-                </button>
+                </Button>
               </nav>
             )}
           </>

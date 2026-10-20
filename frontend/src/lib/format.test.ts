@@ -30,7 +30,9 @@ describe('descripciones', () => {
 
   it('describe la racha', () => {
     expect(streakDescription(3)).toBe('3 victorias seguidas')
-    expect(streakDescription(-1)).toBe('1 derrota seguidas')
+    expect(streakDescription(1)).toBe('1 victoria seguida')
+    expect(streakDescription(-1)).toBe('1 derrota seguida')
+    expect(streakDescription(-2)).toBe('2 derrotas seguidas')
     expect(streakDescription(0)).toBe('—')
   })
 

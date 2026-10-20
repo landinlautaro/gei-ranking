@@ -5,7 +5,7 @@ import { usePlayer, usePlayers } from '../api/queries'
 import { clearMe, setMe, useMe } from '../lib/meStore'
 import { MovementBadge } from './MovementBadge'
 import { Avatar } from './Avatar'
-import { inputClass } from './ui'
+import { Button, buttonClass, inputClass } from './ui'
 
 const cardClass = 'rounded-lg border-2 border-brand bg-white p-4 shadow-sm'
 
@@ -87,17 +87,13 @@ function MyStatus({ playerId, onShowMe }: { playerId: number; onShowMe?: () => v
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <Link to={`/players/${playerId}`} className="inline-flex min-h-12 items-center bg-brand px-5 text-sm font-medium uppercase text-white hover:bg-accent">
+        <Link to={`/players/${playerId}`} className={buttonClass('primary')}>
           Ver mi perfil completo
         </Link>
         {onShowMe && player.position !== null && (
-          <button
-            type="button"
-            onClick={onShowMe}
-            className="inline-flex min-h-12 items-center border border-brand px-5 text-sm font-medium uppercase text-brand hover:bg-slate-50"
-          >
+          <Button variant="secondary" onClick={onShowMe}>
             Ver mi lugar en la tabla
-          </button>
+          </Button>
         )}
         <button type="button" onClick={clearMe} className="min-h-12 text-brand underline hover:text-accent">
           No soy {player.nickname ?? player.fullName}

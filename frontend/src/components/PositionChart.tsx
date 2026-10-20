@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { PositionPoint } from '../api/types'
 import { formatDate } from '../lib/format'
+import { buttonClass } from './ui'
 
 // Chart colors live here as tokens so a dark theme can swap them in one place. Single series: no legend needed.
 const LINE = 'var(--chart-line, #2a78d6)'
@@ -27,31 +28,88 @@ function useElementWidth(ref: React.RefObject<HTMLElement | null>) {
   return width
 }
 
+interface Point {
+  t: number
+  position: number | null
+  at: string
+}
+
+const RANGES = [
+  { id: 'month', label: '1 mes', days: 30 },
+  { id: 'quarter', label: '3 meses', days: 90 },
+  { id: 'all', label: 'Todo', days: null },
+] as const
+
+type RangeId = (typeof RANGES)[number]['id']
+
+/** The points from `start` on, opened with the position held at that moment so the line does not begin in thin air. */
+function clipFrom(all: Point[], start: number): Point[] {
+  const held = all.filter((d) => d.t <= start).at(-1)
+  const after = all.filter((d) => d.t > start)
+  return held ? [{ t: start, position: held.position, at: new Date(start).toISOString() }, ...after] : after
+}
+
 interface PositionChartProps {
   points: PositionPoint[]
+  /** When the player joined: the chart never starts earlier than this (nor than the first recorded position). */
+  from?: Date
   /** Where the last position ends; defaults to now. */
   until?: Date
+}
+
+/** Position over time with a range filter (1 mes / 3 meses / Todo). "Todo" starts when the player joined. */
+export function PositionChart({ points, from, until }: PositionChartProps) {
+  const [range, setRange] = useState<RangeId>('all')
+  const [now] = useState(() => Date.now())
+
+  const all: Point[] = points.map((p) => ({ t: Date.parse(p.at), position: p.position, at: p.at }))
+  if (!all.some((d) => d.position !== null)) {
+    return <p className="text-slate-700">Todavía no hay historial de posiciones.</p>
+  }
+
+  const end = Math.max(until?.getTime() ?? now, all[all.length - 1].t)
+  const baseStart = Math.max(from?.getTime() ?? all[0].t, all[0].t)
+  const days = RANGES.find((r) => r.id === range)!.days
+  const start = days === null ? baseStart : Math.max(baseStart, end - days * DAY)
+  const data = clipFrom(all, start)
+
+  return (
+    <div>
+      <div role="group" aria-label="Rango del gráfico" className="mb-2 flex flex-wrap gap-2">
+        {RANGES.map((r) => (
+          <button
+            key={r.id}
+            type="button"
+            aria-pressed={range === r.id}
+            onClick={() => setRange(r.id)}
+            className={buttonClass(range === r.id ? 'primary' : 'secondary')}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
+      {data.some((d) => d.position !== null) ? (
+        <StepChart key={range} data={data} until={end} />
+      ) : (
+        <p className="text-slate-700">No estuvo en el ranking en este período.</p>
+      )}
+    </div>
+  )
 }
 
 /**
  * Position over time as a step line (a position holds until the next change). #1 is at the top.
  * Hover or arrow keys read a point; the same data is available as a table.
  */
-export function PositionChart({ points, until }: PositionChartProps) {
+function StepChart({ data, until }: { data: Point[]; until: number }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const width = useElementWidth(containerRef)
   const [active, setActive] = useState<number | null>(null)
-  const [now] = useState(() => Date.now())
 
-  const data = points.map((p) => ({ t: Date.parse(p.at), position: p.position, at: p.at }))
-  const ranked = data.filter((d): d is typeof d & { position: number } => d.position !== null)
-
-  if (ranked.length === 0) {
-    return <p className="text-slate-700">Todavía no hay historial de posiciones.</p>
-  }
+  const ranked = data.filter((d): d is Point & { position: number } => d.position !== null)
 
   const tStart = data[0].t
-  const tEnd = Math.max((until?.getTime() ?? now), data[data.length - 1].t, tStart + DAY)
+  const tEnd = Math.max(until, data[data.length - 1].t, tStart + DAY)
   const best = Math.min(...ranked.map((d) => d.position))
   const worst = Math.max(...ranked.map((d) => d.position))
   const yMin = best === worst ? Math.max(1, best - 2) : Math.max(1, best - 1)
@@ -79,7 +137,8 @@ export function PositionChart({ points, until }: PositionChartProps) {
   const yTicks: number[] = []
   for (let p = yMin; p <= yMax; p += tickStep) yTicks.push(p)
 
-  const xTicks = [0, 0.5, 1].map((f) => ({
+  // Three dates do not fit on a phone: keep only the ends.
+  const xTicks = (width < 420 ? [0, 1] : [0, 0.5, 1]).map((f) => ({
     left: MARGIN.left + f * plotW,
     anchor: f === 0 ? 'start' : f === 1 ? 'end' : 'middle',
     label: formatDate(new Date(tStart + f * (tEnd - tStart)).toISOString()),

@@ -7,7 +7,17 @@ const FEEDBACK_MS = 2500
 type Status = 'idle' | 'copied' | 'failed'
 
 /** Copies `text` (computed on click, so it is always current) and says so, for sighted and screen-reader users. */
-export function CopyButton({ label, getText, variant = 'primary' }: { label: string; getText: () => string; variant?: 'primary' | 'secondary' }) {
+export function CopyButton({
+  label,
+  getText,
+  variant = 'primary',
+  className,
+}: {
+  label: string
+  getText: () => string
+  variant?: 'primary' | 'secondary'
+  className?: string
+}) {
   const [status, setStatus] = useState<Status>('idle')
 
   useEffect(() => {
@@ -19,9 +29,9 @@ export function CopyButton({ label, getText, variant = 'primary' }: { label: str
   const copy = async () => setStatus((await copyText(getText())) ? 'copied' : 'failed')
 
   return (
-    <span className="inline-flex flex-wrap items-center gap-3">
-      <Button variant={variant} onClick={() => void copy()}>{label}</Button>
-      <span role="status" className={status === 'failed' ? 'text-red-700' : 'text-green-800'}>
+    <span className="inline-flex flex-wrap items-center">
+      <Button variant={variant} className={className} onClick={() => void copy()}>{label}</Button>
+      <span role="status" className={`${status === 'idle' ? '' : 'ml-3'} ${status === 'failed' ? 'text-red-700' : 'text-green-800'}`}>
         {status === 'copied' && '¡Copiado!'}
         {status === 'failed' && 'No se pudo copiar: seleccioná el texto y copialo a mano.'}
       </span>

@@ -1,3 +1,5 @@
+import { Button } from './ui'
+
 export function LoadingState({ label = 'Cargando…' }: { label?: string }) {
   return (
     <div role="status" className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 text-slate-700">
@@ -18,13 +20,9 @@ export function ErrorState({ error, onRetry }: ErrorStateProps) {
       <p className="font-semibold">Algo salió mal</p>
       <p className="mt-1 text-sm">{error instanceof Error ? error.message : 'Ocurrió un error inesperado.'}</p>
       {onRetry && (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-3 rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
-        >
+        <Button variant="danger" className="mt-3" onClick={onRetry}>
           Reintentar
-        </button>
+        </Button>
       )}
     </div>
   )

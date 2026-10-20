@@ -15,6 +15,10 @@ import { useDocumentTitle } from '../lib/useDocumentTitle'
 import type { PlayerProfile } from '../api/types'
 
 const RECENT_MATCHES = 10
+// Below this many matches the win percentage says little, so it is shown muted with a "Pocos partidos" note.
+const FEW_MATCHES = 3
+// Slightly tighter on phones so the two header buttons share one row at 375px.
+const HEADER_BUTTON = '!px-3 !text-sm sm:!px-4 sm:!text-base'
 // The API caps pages at 100, enough to count the whole record between two players; only the latest few are listed.
 const H2H_MATCHES = 100
 const H2H_LISTED = 5
@@ -40,6 +44,7 @@ export function PlayerPage() {
   }
 
   const { stats } = player
+  const fewMatches = stats.played < FEW_MATCHES
   const details = [
     player.hand && handLabel[player.hand],
     player.backhand && backhandLabel[player.backhand],
@@ -48,43 +53,57 @@ export function PlayerPage() {
 
   return (
     <div className="space-y-8">
-      <Link to="/" className="text-sm text-brand hover:text-accent underline">← Ranking</Link>
+      <Link to="/" className="inline-flex min-h-12 items-center text-sm text-brand hover:text-accent underline">← Ranking</Link>
 
-      <header className="flex items-center gap-4">
-        <Avatar player={player} size="lg" />
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold">{player.fullName}</h1>
-          {player.nickname && <p className="text-slate-700">“{player.nickname}”</p>}
-          <p className="mt-1 flex flex-wrap items-center gap-x-2 text-lg">
-            {player.position !== null ? (
-              <>
-                <span className="font-bold">Puesto #{player.position}</span>
-                <MovementBadge movement={player.movement} />
-              </>
-            ) : (
-              <span className="text-slate-700">Fuera del ranking</span>
-            )}
-            {!player.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-sm font-semibold text-slate-700">Inactivo</span>}
-          </p>
+      <header className="space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-4">
+            <Avatar player={player} size="lg" />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <h1 className="text-2xl font-bold">{player.fullName}</h1>
+                {player.position !== null && (
+                  <span className="flex items-center gap-2 text-lg">
+                    <span className="rounded-lg bg-brand px-3 py-0.5 text-2xl font-black tabular-nums text-white">
+                      <span aria-hidden="true">#{player.position}</span>
+                      <span className="sr-only">Puesto #{player.position}</span>
+                    </span>
+                    <MovementBadge movement={player.movement} />
+                  </span>
+                )}
+              </div>
+              {player.nickname && <p className="text-slate-700">“{player.nickname}”</p>}
+              {(player.position === null || !player.isActive) && (
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-lg">
+                  {player.position === null && <span className="text-slate-700">Fuera del ranking</span>}
+                  {!player.isActive && <span className="rounded bg-slate-200 px-2 py-0.5 text-sm font-semibold text-slate-700">Inactivo</span>}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 sm:shrink-0 sm:justify-end">
+            {player.isActive &&
+              (meId === player.id ? (
+                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 font-medium">
+                  ✓ Este sos vos
+                  <button type="button" onClick={clearMe} className="min-h-12 text-brand underline hover:text-accent">No soy yo</button>
+                </p>
+              ) : (
+                <Button variant="secondary" className={HEADER_BUTTON} onClick={() => setMe(player.id)}>Este es mi perfil</Button>
+              ))}
+            <ShareButton label="Compartir perfil" title={`${player.fullName} · Ranking GEI`} className={HEADER_BUTTON} />
+          </div>
         </div>
-      </header>
 
-      <div className="space-y-3">
-        <p className="text-sm text-slate-700">{details.join(' · ')}</p>
-        {player.isActive &&
-          (meId === player.id ? (
-            <p className="flex flex-wrap items-center gap-x-4 gap-y-1 font-medium">
-              ✓ Este sos vos
-              <button type="button" onClick={clearMe} className="min-h-12 text-brand underline hover:text-accent">No soy yo</button>
-            </p>
-          ) : (
-            <Button variant="secondary" onClick={() => setMe(player.id)}>Soy yo</Button>
+        <ul aria-label="Datos del jugador" className="flex flex-wrap gap-2">
+          {details.map((detail) => (
+            <li key={detail} className="rounded-full border border-slate-300 bg-white px-3 py-1 text-base font-medium text-slate-900">
+              {detail}
+            </li>
           ))}
-      </div>
-
-      <div>
-        <ShareButton label="Compartir perfil" title={`${player.fullName} · Ranking GEI`} />
-      </div>
+        </ul>
+      </header>
 
       {meId !== null && meId !== player.id && <HeadToHead meId={meId} rival={player} />}
 
@@ -116,24 +135,25 @@ export function PlayerPage() {
         <h2 id="stats-title" className="text-lg font-semibold">Estadísticas</h2>
         <dl className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Stat label="Partidos jugados" value={stats.played} />
-          <Stat label="% de victorias" value={percentage(stats.winPercentage)} />
-          <Stat label="Racha actual" value={streakDescription(stats.currentStreak)} small />
+          <Stat
+            label="% de victorias"
+            value={percentage(stats.winPercentage)}
+            muted={fewMatches}
+            hint={stats.played > 0 ? `${stats.wins}/${stats.played}${fewMatches ? ' · Pocos partidos' : ''}` : 'Pocos partidos'}
+          />
+          <Stat label="Racha actual" value={<StreakValue streak={stats.currentStreak} />} />
           <Stat label="Mejor posición" value={player.bestPosition === null ? '—' : `#${player.bestPosition}`} />
         </dl>
-        <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          <Stat label="Ganados" value={stats.wins} minor />
-          <Stat label="Perdidos" value={stats.losses} minor />
-          <Stat label="Desafíos ganados" value={stats.challengesWon} minor />
-          <Stat label="Desafíos perdidos" value={stats.challengesLost} minor />
-          <Stat label="Defensas ganadas" value={stats.defensesWon} minor />
-          <Stat label="Defensas perdidas" value={stats.defensesLost} minor />
+        <dl className="mt-3 grid grid-cols-2 gap-3">
+          <Stat label="Desafíos" value={`${stats.challengesWon}-${stats.challengesLost}`} hint="ganados - perdidos" />
+          <Stat label="Defensas" value={`${stats.defensesWon}-${stats.defensesLost}`} hint="ganadas - perdidas" />
         </dl>
       </section>
 
       <section aria-labelledby="chart-title">
         <h2 id="chart-title" className="text-lg font-semibold">Evolución de la posición</h2>
         <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-          <PositionChart points={player.positionHistory} />
+          <PositionChart points={player.positionHistory} from={new Date(player.joinedAt)} />
         </div>
       </section>
 
@@ -163,12 +183,24 @@ export function PlayerPage() {
   )
 }
 
-function Stat({ label, value, small = false, minor = false }: { label: string; value: React.ReactNode; small?: boolean; minor?: boolean }) {
+function Stat({ label, value, hint, muted = false }: { label: string; value: React.ReactNode; hint?: string; muted?: boolean }) {
   return (
-    <div className={`rounded-lg border border-slate-200 bg-white shadow-sm ${minor ? 'flex items-baseline justify-between gap-2 px-3 py-2' : 'p-3'}`}>
-      <dt className="text-base text-slate-700">{label}</dt>
-      <dd className={`font-bold tabular-nums ${minor ? 'text-lg' : small ? 'mt-1 text-lg' : 'mt-1 text-3xl'}`}>{value}</dd>
+    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+      <dt className="text-sm text-slate-700 sm:text-base">{label}</dt>
+      <dd className={`mt-1 text-3xl font-bold tabular-nums ${muted ? 'text-slate-600' : ''}`}>{value}</dd>
+      {hint && <dd className="text-sm text-slate-700">{hint}</dd>}
     </div>
+  )
+}
+
+/** The streak count in the same big type as the other cards; the words ("victorias seguidas") go small underneath so they fit at 375px. */
+function StreakValue({ streak }: { streak: number }) {
+  if (streak === 0) return <>—</>
+  const words = streakDescription(streak).replace(/^\d+ /, '')
+  return (
+    <>
+      {Math.abs(streak)} <span className="block text-base font-medium">{words}</span>
+    </>
   )
 }
 

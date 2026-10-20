@@ -36,21 +36,29 @@ export function Field({ label, error, hint, children }: FieldProps) {
   )
 }
 
+// Sentence case, no uppercase. Every variant has a 2px border so primary and secondary are the same size side by side.
 const buttonBase =
-  'inline-flex min-h-12 items-center justify-center gap-2 px-4 py-2 text-sm font-medium uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex min-h-12 items-center justify-center gap-2 rounded-md border-2 px-4 py-2 text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50'
 
 const variants = {
-  primary: 'bg-brand text-white enabled:hover:bg-accent',
-  secondary: 'border border-slate-300 bg-white text-slate-900 enabled:hover:bg-slate-100',
-  danger: 'bg-red-700 text-white enabled:hover:bg-red-800',
+  /** The main action of a screen: filled brand blue. */
+  primary: 'border-brand bg-brand text-white enabled:hover:border-brand-dark enabled:hover:bg-brand-dark',
+  /** Any other action: brand-blue outline on white. */
+  secondary: 'border-brand bg-white text-brand-dark enabled:hover:bg-sky-50',
+  danger: 'border-red-700 bg-red-700 text-white enabled:hover:border-red-800 enabled:hover:bg-red-800',
 } as const
+
+/** Button look for things that are not a <button> (links that act as buttons). */
+export function buttonClass(variant: keyof typeof variants = 'primary', className = '') {
+  return `${buttonBase} ${variants[variant]} ${className}`.trim()
+}
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: keyof typeof variants
 }
 
 export function Button({ variant = 'primary', className = '', type = 'button', ...props }: ButtonProps) {
-  return <button type={type} className={`${buttonBase} ${variants[variant]} ${className}`} {...props} />
+  return <button type={type} className={buttonClass(variant, className)} {...props} />
 }
 
 const noticeTones = {

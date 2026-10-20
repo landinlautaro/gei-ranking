@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useAdminPlayers, useAdminMatches, useVoidMatch } from '../../api/admin'
 import type { AdminMatch, MatchChangeResult, MatchStatus } from '../../api/adminTypes'
 import { EmptyState, ErrorState, LoadingState } from '../../components/PageState'
-import { Button, ConfirmButton, Notice, inputClass } from '../../components/ui'
+import { Button, ConfirmButton, Notice, buttonClass, inputClass } from '../../components/ui'
 import { describeError, messageForCode } from '../../lib/errors'
 import { formatDate, plural } from '../../lib/format'
 import { useDocumentTitle } from '../../lib/useDocumentTitle'
@@ -52,7 +52,7 @@ export function AdminMatchesPage() {
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Partidos</h1>
-        <Link to="/admin/results/new" className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-accent">
+        <Link to="/admin/results/new" className={buttonClass('primary')}>
           Cargar resultado
         </Link>
       </div>
@@ -171,7 +171,7 @@ function MatchRow({ match, onVoid, voiding }: { match: AdminMatch; onVoid: () =>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Link
             to={`/admin/matches/${match.id}/edit`}
-            className="inline-flex min-h-12 items-center justify-center bg-brand px-4 py-2 text-sm font-medium uppercase text-white hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className={buttonClass('primary')}
             aria-label={`Editar partido del ${formatDate(match.playedAt)} entre ${match.challenger.fullName} y ${match.challenged.fullName}`}
           >
             Editar

@@ -31,6 +31,11 @@ h1 {
   @apply text-brand;
 }
 
+/* El placeholder por defecto de Tailwind es el texto al 50% (4.0:1 sobre blanco): slate-600 da 7.6:1. */
+::placeholder {
+  color: var(--color-slate-600);
+}
+
 a {
   transition: color 0.3s, background-color 0.3s;
 }

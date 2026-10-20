@@ -13,7 +13,7 @@ import {
 import type { AdminPlayer, PlayerInput } from '../../api/adminTypes'
 import { Avatar } from '../../components/Avatar'
 import { EmptyState, ErrorState, LoadingState } from '../../components/PageState'
-import { Button, ConfirmButton, Field, inputClass, Notice } from '../../components/ui'
+import { Button, buttonClass, ConfirmButton, Field, inputClass, Notice } from '../../components/ui'
 import { describeError, fieldErrors } from '../../lib/errors'
 import { backhandLabel, clubDateInput, clubNoonIso, formatDate, handLabel, normalizeText, todayClubDate } from '../../lib/format'
 import { useDocumentTitle } from '../../lib/useDocumentTitle'
@@ -34,7 +34,7 @@ export function AdminPlayersPage() {
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Jugadores</h1>
-        <Link to="/admin/players/new" className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-accent">
+        <Link to="/admin/players/new" className={buttonClass('primary')}>
           Nuevo jugador
         </Link>
       </div>
