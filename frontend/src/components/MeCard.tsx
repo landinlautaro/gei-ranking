@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../api/client'
-import { usePlayer, usePlayers } from '../api/queries'
+import { useChallenges, usePlayer, usePlayers } from '../api/queries'
+import { playersWithOpenChallenge } from '../lib/challenge'
 import { clearMe, setMe, useMe } from '../lib/meStore'
 import { MovementBadge } from './MovementBadge'
 import { Avatar } from './Avatar'
@@ -39,6 +40,8 @@ function PickPlayer() {
 function MyStatus({ playerId, onShowMe }: { playerId: number; onShowMe?: () => void }) {
   const { data: player, error } = usePlayer(playerId)
   const gone = error instanceof ApiError && error.status === 404
+  // Purely visual: whoever is in an open challenge shows greyed out. If the board fails, everyone shows as available.
+  const busyPlayers = playersWithOpenChallenge(useChallenges().data)
 
   // The player was removed: forget the choice and offer the picker again.
   useEffect(() => {
@@ -67,18 +70,24 @@ function MyStatus({ playerId, onShowMe }: { playerId: number; onShowMe?: () => v
       <h3 className="mt-4 text-lg">Hoy podés desafiar a:</h3>
       {player.canChallenge.length > 0 ? (
         <ul className="mt-2 space-y-2">
-          {player.canChallenge.map((c) => (
-            <li key={c.player.id}>
-              <Link
-                to={`/players/${c.player.id}`}
-                className="flex min-h-12 items-center gap-3 rounded-lg border border-slate-300 bg-white px-3 py-2 text-lg hover:bg-slate-50"
-              >
-                <span className="w-10 text-right font-black tabular-nums">{c.position}</span>
-                <Avatar player={c.player} size="sm" />
-                <span className="min-w-0 break-words">{c.player.fullName}</span>
-              </Link>
-            </li>
-          ))}
+          {player.canChallenge.map((c) => {
+            const busy = busyPlayers.has(c.player.id)
+            return (
+              <li key={c.player.id}>
+                <Link
+                  to={`/players/${c.player.id}`}
+                  className={`flex min-h-12 items-center gap-3 rounded-lg border border-slate-300 px-3 py-2 text-lg hover:bg-slate-50 ${
+                    busy ? 'bg-slate-100 text-slate-600' : 'bg-white'
+                  }`}
+                >
+                  <span className="w-10 text-right font-black tabular-nums">{c.position}</span>
+                  <Avatar player={c.player} size="sm" />
+                  <span className="min-w-0 break-words">{c.player.fullName}</span>
+                  {busy && <span className="ml-auto shrink-0 text-sm">Ya tiene un desafío</span>}
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       ) : (
         <p className="mt-2 text-slate-700">

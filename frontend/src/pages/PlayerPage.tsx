@@ -9,7 +9,7 @@ import { ShareButton } from '../components/ShareButton'
 import { Button } from '../components/ui'
 import { ErrorState, LoadingState } from '../components/PageState'
 import { PositionChart } from '../components/PositionChart'
-import { CHALLENGE_RANGE, challengeRelation, type ChallengeRelation } from '../lib/challenge'
+import { CHALLENGE_RANGE, challengeRelation, playersWithOpenChallenge, type ChallengeRelation } from '../lib/challenge'
 import { backhandLabel, formatDate, handLabel, percentage, streakDescription } from '../lib/format'
 import { clearMe, setMe, useMe } from '../lib/meStore'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -34,9 +34,7 @@ export function PlayerPage() {
   // Purely visual: whoever is in an open challenge (on time or expired) shows greyed out in the list of who can be challenged.
   // If the board cannot be loaded the list simply shows everyone as available.
   const board = useChallenges(Number.isInteger(id) && id > 0).data
-  const playersWithOpenChallenge = new Set(
-    [...(board?.active ?? []), ...(board?.expired ?? [])].flatMap((c) => [c.challenger.id, c.challenged.id]),
-  )
+  const busyPlayers = playersWithOpenChallenge(board)
 
   if (isPending && Number.isInteger(id) && id > 0) return <LoadingState label="Cargando perfil…" />
   if (isError || !player) {
@@ -113,7 +111,7 @@ export function PlayerPage() {
         </ul>
       </header>
 
-      {meId !== null && meId !== player.id && <HeadToHead meId={meId} rival={player} openChallengeIds={playersWithOpenChallenge} />}
+      {meId !== null && meId !== player.id && <HeadToHead meId={meId} rival={player} openChallengeIds={busyPlayers} />}
 
       {player.activeChallenges.length > 0 && (
         <section aria-labelledby="open-challenges-title">
@@ -133,7 +131,7 @@ export function PlayerPage() {
         {player.canChallenge.length > 0 ? (
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {player.canChallenge.map((c) => {
-              const busy = playersWithOpenChallenge.has(c.player.id)
+              const busy = busyPlayers.has(c.player.id)
               return (
                 <li key={c.player.id}>
                   <Link

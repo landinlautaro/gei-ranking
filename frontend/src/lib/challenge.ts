@@ -1,3 +1,4 @@
+import type { ChallengeBoard } from '../api/types'
 import { clubDateInput, formatDayMonth, plural } from './format'
 
 /** A player can challenge up to this many places above their own. */
@@ -11,6 +12,14 @@ export function challengeRelation(mine: number, theirs: number): ChallengeRelati
   if (gap >= 1 && gap <= CHALLENGE_RANGE) return 'canChallenge'
   if (gap <= -1 && gap >= -CHALLENGE_RANGE) return 'canBeChallenged'
   return 'outOfRange'
+}
+
+/**
+ * Ids of the players in an open challenge (on time or expired, in either role). Used to grey them out where
+ * players are offered as rivals; with no board (not loaded yet, or it failed) nobody is greyed out.
+ */
+export function playersWithOpenChallenge(board: Pick<ChallengeBoard, 'active' | 'expired'> | undefined): Set<number> {
+  return new Set([...(board?.active ?? []), ...(board?.expired ?? [])].flatMap((c) => [c.challenger.id, c.challenged.id]))
 }
 
 const DAY_MS = 86_400_000
