@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { vi } from 'vitest'
 import App from './App'
 import type { AdminMatch, AdminPlayer, MatchPreview } from './api/adminTypes'
-import type { Match, PlayerProfile, PlayerRef, RankingRow } from './api/types'
+import type { Challenge, Match, PlayerProfile, PlayerRef, RankingRow } from './api/types'
 import { saveSession } from './lib/authStore'
 
 export function player(id: number, fullName = `Jugador ${id}`, nickname: string | null = null): PlayerRef {
@@ -72,6 +72,26 @@ export function profile(p: PlayerRef, overrides: Partial<PlayerProfile> = {}): P
       { at: '2026-01-01T12:00:00Z', position: 8 },
       { at: '2026-02-01T12:00:00Z', position: 5 },
     ],
+    activeChallenges: [],
+    ...overrides,
+  }
+}
+
+/** A pending challenge whose deadline is far in the future (or far in the past with `expired`), so countdown text never depends on today. */
+export function challenge(id: number, challenger: PlayerRef, challenged: PlayerRef, overrides: Partial<Challenge> = {}): Challenge {
+  return {
+    id,
+    challenger,
+    challenged,
+    challengerPosition: 8,
+    challengedPosition: 5,
+    // Monday 6/1/2099 to the end of Sunday 11/1/2099, club time.
+    issuedAt: '2099-01-06T15:00:00Z',
+    deadlineAt: '2099-01-12T02:59:59.999Z',
+    status: 'Pending',
+    isExpired: false,
+    scheduledAt: null,
+    matchId: null,
     ...overrides,
   }
 }

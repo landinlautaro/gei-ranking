@@ -56,6 +56,37 @@ export interface PlayerProfile extends PlayerRef {
   stats: PlayerStats
   canChallenge: RankingRow[]
   positionHistory: PositionPoint[]
+  /** Challenges he is in that are still open (expired ones included), soonest deadline first. */
+  activeChallenges: Challenge[]
+}
+
+/** Stored status; "expired" is derived (see `isExpired`). */
+export type ChallengeStatus = 'Pending' | 'Scheduled' | 'Played' | 'Cancelled'
+
+export interface Challenge {
+  id: number
+  challenger: PlayerRef
+  challenged: PlayerRef
+  /** Current positions; null when not ranked. */
+  challengerPosition: number | null
+  challengedPosition: number | null
+  issuedAt: string
+  deadlineAt: string
+  status: ChallengeStatus
+  /** Open and past its deadline. */
+  isExpired: boolean
+  /** Date and time the players agreed on, if they did. */
+  scheduledAt: string | null
+  matchId: number | null
+}
+
+export interface ChallengeBoard {
+  /** Open and on time, soonest deadline first. */
+  active: Challenge[]
+  /** Open but past the deadline, oldest first. */
+  expired: Challenge[]
+  /** Settled in the last 7 days. */
+  recentlyPlayed: Challenge[]
 }
 
 export type Completion = 'Normal' | 'Walkover' | 'Retirement'

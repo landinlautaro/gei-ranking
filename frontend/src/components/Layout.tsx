@@ -24,6 +24,9 @@ export function Layout() {
             <NavLink to="/" end className={navClass}>
               Ranking
             </NavLink>
+            <NavLink to="/challenges" className={navClass}>
+              Desafíos
+            </NavLink>
             <NavLink to="/matches" className={navClass}>
               Partidos
             </NavLink>

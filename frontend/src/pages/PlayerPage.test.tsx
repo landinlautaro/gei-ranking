@@ -29,7 +29,8 @@ describe('PlayerPage', () => {
     expect(details.getByText('Revés a dos manos')).toBeInTheDocument()
     expect(details.getByText('En el club desde 01/01/2026')).toBeInTheDocument()
 
-    const stat = (label: string) => screen.getByText(label).closest('div')!
+    // The main menu also has a "Desafíos" link, so look only inside the page content.
+    const stat = (label: string) => within(screen.getByRole('main')).getByText(label).closest('div')!
     expect(within(stat('% de victorias')).getByText('75%')).toBeInTheDocument()
     expect(within(stat('% de victorias')).getByText('3/4')).toBeInTheDocument()
     expect(screen.queryByText(/Pocos partidos/)).not.toBeInTheDocument()

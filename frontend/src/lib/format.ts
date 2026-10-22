@@ -19,6 +19,26 @@ export function normalizeText(text: string): string {
   return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 }
 
+const dayMonthFormat = new Intl.DateTimeFormat('es-AR', {
+  timeZone: CLUB_TIME_ZONE,
+  weekday: 'short',
+  day: '2-digit',
+  month: '2-digit',
+})
+
+const timeFormat = new Intl.DateTimeFormat('es-AR', { timeZone: CLUB_TIME_ZONE, hour: '2-digit', minute: '2-digit', hour12: false })
+
+/** "dom 26/10" in club local time. */
+export function formatDayMonth(iso: string): string {
+  const parts = Object.fromEntries(dayMonthFormat.formatToParts(new Date(iso)).map((p) => [p.type, p.value]))
+  return `${String(parts.weekday).replace('.', '')} ${parts.day}/${parts.month}`
+}
+
+/** "jue 23/10 19:00" in club local time. */
+export function formatDayMonthTime(iso: string): string {
+  return `${formatDayMonth(iso)} ${timeFormat.format(new Date(iso))}`
+}
+
 export function plural(count: number, one: string, many: string): string {
   return `${count} ${Math.abs(count) === 1 ? one : many}`
 }

@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { LoadingState } from './components/PageState'
+import { ChallengesPage } from './pages/ChallengesPage'
 import { MatchesPage } from './pages/MatchesPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PlayerPage } from './pages/PlayerPage'
@@ -28,6 +29,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<RankingPage />} />
         <Route path="players/:id" element={<PlayerPage />} />
+        <Route path="challenges" element={<ChallengesPage />} />
         <Route path="matches" element={<MatchesPage />} />
         <Route path="rules" element={<RulesPage />} />
         <Route path="*" element={<NotFoundPage />} />

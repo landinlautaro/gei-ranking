@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { ApiError, getJson } from './client'
-import type { MatchFilters, Paged, Match, PlayerListItem, PlayerProfile, RankingRow } from './types'
+import type { ChallengeBoard, MatchFilters, Paged, Match, PlayerListItem, PlayerProfile, RankingRow } from './types'
 
 /** Retry policy for the app's QueryClient: a missing resource (404) will not appear on retry; anything else gets one more chance. */
 export const retryUnlessNotFound = (failureCount: number, error: Error) =>
@@ -25,6 +25,13 @@ export function usePlayer(id: number) {
     queryKey: ['player', id],
     queryFn: ({ signal }) => getJson<PlayerProfile>(`/api/players/${id}`, undefined, signal),
     enabled: Number.isInteger(id) && id > 0,
+  })
+}
+
+export function useChallenges() {
+  return useQuery({
+    queryKey: ['challenges'],
+    queryFn: ({ signal }) => getJson<ChallengeBoard>('/api/challenges', undefined, signal),
   })
 }
 

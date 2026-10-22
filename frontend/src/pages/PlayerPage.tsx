@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { useMatches, usePlayer } from '../api/queries'
 import { Avatar } from '../components/Avatar'
+import { ChallengeCard } from '../components/ChallengeCard'
 import { MatchCard } from '../components/MatchCard'
 import { MovementBadge } from '../components/MovementBadge'
 import { ShareButton } from '../components/ShareButton'
@@ -106,6 +107,19 @@ export function PlayerPage() {
       </header>
 
       {meId !== null && meId !== player.id && <HeadToHead meId={meId} rival={player} />}
+
+      {player.activeChallenges.length > 0 && (
+        <section aria-labelledby="open-challenges-title">
+          <h2 id="open-challenges-title" className="text-lg font-semibold">
+            {player.activeChallenges.length === 1 ? 'Desafío abierto' : 'Desafíos abiertos'}
+          </h2>
+          <ul className="mt-3 space-y-2">
+            {player.activeChallenges.map((c) => (
+              <ChallengeCard key={c.id} challenge={c} perspectiveId={player.id} />
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section aria-labelledby="challenge-title">
         <h2 id="challenge-title" className="text-lg font-semibold">A quiénes puede desafiar hoy</h2>
