@@ -67,6 +67,7 @@ builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLi
 
 builder.Services.AddScoped<PlayerAdminService>();
 builder.Services.AddScoped<MatchAdminService>();
+builder.Services.AddScoped<ChallengeAdminService>();
 
 var app = builder.Build();
 

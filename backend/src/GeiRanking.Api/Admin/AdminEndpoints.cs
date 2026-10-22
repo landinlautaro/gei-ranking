@@ -21,6 +21,7 @@ public static class AdminEndpoints
 
         MapPlayers(admin.MapGroup("/players").WithTags("Admin · Players"));
         MapMatches(admin.MapGroup("/matches").WithTags("Admin · Matches"));
+        MapChallenges(admin.MapGroup("/challenges").WithTags("Admin · Challenges"));
 
         admin.MapPost("/ranking/adjustments", AdjustPosition)
             .WithTags("Admin · Ranking")
@@ -164,6 +165,50 @@ public static class AdminEndpoints
             .ToDictionaryAsync(p => p.Id, p => new PlayerRefDto(p.Id, p.FullName, p.Nickname, p.PhotoPath), ct);
 
         return TypedResults.Ok(new PagedDto<AdminMatchDto>(items.Select(m => MatchAdminService.ToDto(m, players)).ToList(), total, page, pageSize));
+    }
+
+    // ---------------------------------------------------------------- challenges
+
+    private static void MapChallenges(RouteGroupBuilder challenges)
+    {
+        challenges.MapGet("", async (ChallengeAdminService service, CancellationToken ct,
+                ChallengeFilter? status = null, int? playerId = null, DateOnly? weekOf = null, int page = 1, int pageSize = DefaultPageSize) =>
+            {
+                if (page < 1 || pageSize < 1 || pageSize > MaxPageSize)
+                {
+                    return Results.ValidationProblem(new Dictionary<string, string[]> { ["paging"] = ["InvalidPaging"] });
+                }
+
+                return Results.Ok(await service.ListAsync(status, playerId, weekOf, page, pageSize, ct));
+            })
+            .WithName("AdminListChallenges")
+            .WithSummary("Challenges, newest first. Filters: status (Active|Expired|Pending|Scheduled|Played|Cancelled), playerId, weekOf (any day of the week).");
+
+        challenges.MapGet("{id:int}", async (int id, ChallengeAdminService service, CancellationToken ct) =>
+                TypedResults.Ok(await service.GetAsync(id, ct)))
+            .WithName("AdminGetChallenge").WithSummary("One challenge.");
+
+        challenges.MapPost("preview", async (ChallengeInput input, ChallengeAdminService service, CancellationToken ct) =>
+                TypedResults.Ok(await service.PreviewAsync(input, ct)))
+            .WithName("AdminPreviewChallenge")
+            .WithSummary("Validates a challenge and lists its warnings (out of range, outside Monday-Wednesday, already challenged this week) without saving.");
+
+        challenges.MapPost("", async (ChallengeInput input, ChallengeAdminService service, CancellationToken ct) =>
+            {
+                var created = await service.CreateAsync(input, ct);
+                return TypedResults.Created($"/api/admin/challenges/{created.Id}", created);
+            })
+            .WithName("AdminCreateChallenge")
+            .WithSummary("Registers a challenge. With warnings it answers 409 unless confirmWarnings=true.");
+
+        challenges.MapPut("{id:int}", async (int id, ChallengeUpdateRequest request, ChallengeAdminService service, CancellationToken ct) =>
+                TypedResults.Ok(await service.UpdateAsync(id, request, ct)))
+            .WithName("AdminUpdateChallenge")
+            .WithSummary("Edits date, deadline, agreed date and notes of an active challenge. A null scheduledAt clears the agreed date.");
+
+        challenges.MapPost("{id:int}/cancel", async (int id, CancelChallengeRequest request, ChallengeAdminService service, CancellationToken ct) =>
+                TypedResults.Ok(await service.CancelAsync(id, request, ct)))
+            .WithName("AdminCancelChallenge").WithSummary("Cancels an active challenge (it stays in the history).");
     }
 
     // ---------------------------------------------------------------- ranking

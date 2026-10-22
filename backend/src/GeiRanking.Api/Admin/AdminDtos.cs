@@ -1,4 +1,5 @@
 using GeiRanking.Api.Dtos;
+using GeiRanking.Domain.Challenges;
 using GeiRanking.Domain.Matches;
 using GeiRanking.Domain.Players;
 using GeiRanking.Domain.Ranking;
@@ -94,6 +95,72 @@ public sealed record MatchPreviewDto(
     /// <summary>True when the challenge is out of range: saving needs <c>allowOutOfRange: true</c>.</summary>
     bool RequiresOutOfRangeConfirmation,
     IReadOnlyList<int> NewlyWarnedMatchIds);
+
+// ---- Challenges ----
+
+/// <summary>Rules a challenge can break without being rejected: the admin sees them and confirms.</summary>
+public enum ChallengeWarning
+{
+    OutOfRange,
+    AlreadyChallengedThisWeek,
+    OutsideChallengeWindow,
+}
+
+/// <summary>What the admin list can show. Expired is derived (active past its deadline), the rest are stored statuses.</summary>
+public enum ChallengeFilter
+{
+    Active,
+    Expired,
+    Pending,
+    Scheduled,
+    Played,
+    Cancelled,
+}
+
+/// <summary>Body to preview or register a challenge.</summary>
+public sealed record ChallengeInput(
+    int ChallengerId,
+    int ChallengedId,
+    /// <summary>When it was announced; null = now.</summary>
+    DateTimeOffset? IssuedAt,
+    DateTimeOffset? ScheduledAt,
+    string? Notes,
+    /// <summary>Confirms saving despite the warnings of the preview.</summary>
+    bool ConfirmWarnings = false);
+
+/// <summary>Edits an active challenge. Null <see cref="ScheduledAt"/> clears the agreed date.</summary>
+public sealed record ChallengeUpdateRequest(
+    DateTimeOffset IssuedAt,
+    DateTimeOffset DeadlineAt,
+    DateTimeOffset? ScheduledAt,
+    string? Notes);
+
+public sealed record CancelChallengeRequest(string? Reason);
+
+public sealed record AdminChallengeDto(
+    int Id,
+    PlayerRefDto Challenger,
+    PlayerRefDto Challenged,
+    int? ChallengerPosition,
+    int? ChallengedPosition,
+    DateTimeOffset IssuedAt,
+    DateTimeOffset DeadlineAt,
+    ChallengeStatus Status,
+    bool IsExpired,
+    DateTimeOffset? ScheduledAt,
+    int? MatchId,
+    string? Notes,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt);
+
+public sealed record ChallengePreviewDto(
+    /// <summary>False when there are field errors (see <see cref="Errors"/>).</summary>
+    bool IsValid,
+    IReadOnlyDictionary<string, string[]> Errors,
+    int? ChallengerPosition,
+    int? ChallengedPosition,
+    DateTimeOffset? DeadlineAt,
+    IReadOnlyList<ChallengeWarning> Warnings);
 
 // ---- Manual adjustment ----
 
