@@ -51,7 +51,9 @@ public sealed record MatchInput(
     MatchSide? Winner,
     string? Notes,
     /// <summary>Confirms saving a challenge outside the 5-place range.</summary>
-    bool AllowOutOfRange = false);
+    bool AllowOutOfRange = false,
+    /// <summary>Active challenge this result settles: it is marked as played and linked to the new match. Only used when creating.</summary>
+    int? ChallengeId = null);
 
 public sealed record AdminMatchDto(
     int Id,

@@ -6,6 +6,7 @@ using GeiRanking.Api.Auth;
 using GeiRanking.Api.Tests.Support;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -180,6 +181,13 @@ public class HostingTests(PostgresFixture fixture) : AdminApiTestBase(fixture), 
 
     // ---- migrate command ----
 
+    /// <summary>Every migration of the model: the first run on an empty database applies all of them.</summary>
+    private int AllMigrations()
+    {
+        using var db = Fixture.CreateContext();
+        return db.Database.GetMigrations().Count();
+    }
+
     [Fact]
     public async Task MigrateCommand_CreatesTheSchemaOnAnEmptyDatabase_AndIsSafeToRepeat()
     {
@@ -190,16 +198,16 @@ public class HostingTests(PostgresFixture fixture) : AdminApiTestBase(fixture), 
             var second = await RunApiCommandAsync("migrate", connectionString);
 
             Assert.Equal(0, first.ExitCode);
-            Assert.Contains("Applied 2 migration(s)", first.Output);
+            Assert.Contains($"Applied {AllMigrations()} migration(s)", first.Output);
             Assert.Equal(0, second.ExitCode);
             Assert.Contains("up to date", second.Output);
 
             await using var connection = new NpgsqlConnection(connectionString);
             await connection.OpenAsync();
             await using var command = new NpgsqlCommand(
-                "select count(*) from information_schema.tables where table_schema = 'public' and table_name in ('players','matches','ranking_events','ranking_snapshot','ranking_history','admin_users')",
+                "select count(*) from information_schema.tables where table_schema = 'public' and table_name in ('players','matches','challenges','ranking_events','ranking_snapshot','ranking_history','admin_users')",
                 connection);
-            Assert.Equal(6L, await command.ExecuteScalarAsync());
+            Assert.Equal(7L, await command.ExecuteScalarAsync());
         }
         finally
         {

@@ -1,4 +1,5 @@
 using GeiRanking.Api.Dtos;
+using GeiRanking.Domain.Challenges;
 using GeiRanking.Domain.Matches;
 using GeiRanking.Domain.Ranking;
 using GeiRanking.Infrastructure;
@@ -88,6 +89,21 @@ public sealed class MatchAdminService(AppDbContext db, RankingService ranking, T
             {
                 Kind = RankingEventKind.MatchPlayed, MatchId = match.Id, OccurredAt = match.PlayedAt, CreatedAt = now,
             });
+
+            if (input.ChallengeId is { } challengeId)
+            {
+                // Same transaction as the match: if the challenge was settled meanwhile, nothing is saved.
+                var challenge = await context.Challenges.SingleAsync(c => c.Id == challengeId, token);
+                if (!challenge.IsActive)
+                {
+                    throw ApiProblemException.Conflict("ChallengeNotActive", $"The challenge is {challenge.Status} and cannot be settled.");
+                }
+
+                challenge.MatchId = match.Id;
+                challenge.Status = ChallengeStatus.Played;
+                challenge.UpdatedAt = now;
+            }
+
             await context.SaveChangesAsync(token);
             id = match.Id;
         }, ct);
@@ -144,6 +160,16 @@ public sealed class MatchAdminService(AppDbContext db, RankingService ranking, T
                 var match = await context.Matches.SingleAsync(m => m.Id == id, token);
                 match.Status = MatchStatus.Voided;
                 match.UpdatedAt = now;
+
+                // The challenge it settled is open again (and shows as expired if its deadline has passed).
+                var challenge = await context.Challenges.SingleOrDefaultAsync(c => c.MatchId == id, token);
+                if (challenge is not null)
+                {
+                    challenge.MatchId = null;
+                    challenge.Status = challenge.ScheduledAt is null ? ChallengeStatus.Pending : ChallengeStatus.Scheduled;
+                    challenge.UpdatedAt = now;
+                }
+
                 await context.SaveChangesAsync(token);
             }, ct);
         }
@@ -232,6 +258,8 @@ public sealed class MatchAdminService(AppDbContext db, RankingService ranking, T
             errors["winner"] = [nameof(ScoreError.WinnerRequired)];
         }
 
+        await ValidateChallengeLinkAsync(input, editingMatchId, errors, ct);
+
         if (errors.Count > 0)
         {
             return evaluation;
@@ -277,6 +305,44 @@ public sealed class MatchAdminService(AppDbContext db, RankingService ranking, T
             .ToList();
 
         return evaluation;
+    }
+
+    /// <summary>
+    /// Creating: the challenge to settle must exist, be active and be between the same players in the same roles.
+    /// Editing: a match that settled a challenge cannot stop being between those two players.
+    /// </summary>
+    private async Task ValidateChallengeLinkAsync(MatchInput input, int? editingMatchId, Dictionary<string, string[]> errors, CancellationToken ct)
+    {
+        if (editingMatchId is { } matchId)
+        {
+            var linked = await db.Challenges.AsNoTracking().Where(c => c.MatchId == matchId)
+                .Select(c => new { c.ChallengerId, c.ChallengedId }).FirstOrDefaultAsync(ct);
+            if (linked is not null && (linked.ChallengerId != input.ChallengerId || linked.ChallengedId != input.ChallengedId))
+            {
+                errors["match"] = ["LinkedChallengeMismatch"];
+            }
+
+            return;
+        }
+
+        if (input.ChallengeId is not { } challengeId)
+        {
+            return;
+        }
+
+        var challenge = await db.Challenges.AsNoTracking().FirstOrDefaultAsync(c => c.Id == challengeId, ct);
+        if (challenge is null)
+        {
+            errors["challengeId"] = ["ChallengeNotFound"];
+        }
+        else if (!challenge.IsActive)
+        {
+            errors["challengeId"] = ["ChallengeNotActive"];
+        }
+        else if (challenge.ChallengerId != input.ChallengerId || challenge.ChallengedId != input.ChallengedId)
+        {
+            errors["challengeId"] = ["PlayersDoNotMatch"];
+        }
     }
 
     private static void ThrowUnlessSavable(Evaluation evaluation, bool allowOutOfRange)
