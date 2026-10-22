@@ -3,7 +3,7 @@ import { render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { vi } from 'vitest'
 import App from './App'
-import type { AdminMatch, AdminPlayer, MatchPreview } from './api/adminTypes'
+import type { AdminChallenge, AdminMatch, AdminPlayer, ChallengePreview, MatchPreview } from './api/adminTypes'
 import type { Challenge, Match, PlayerProfile, PlayerRef, RankingRow } from './api/types'
 import { saveSession } from './lib/authStore'
 
@@ -190,6 +190,28 @@ export function adminMatch(id: number, challenger: PlayerRef, challenged: Player
     notes: null,
     createdAt: '2026-03-11T15:00:00Z',
     updatedAt: '2026-03-11T15:00:00Z',
+    ...overrides,
+  }
+}
+
+export function adminChallenge(id: number, challenger: PlayerRef, challenged: PlayerRef, overrides: Partial<AdminChallenge> = {}): AdminChallenge {
+  return {
+    ...challenge(id, challenger, challenged),
+    notes: null,
+    createdAt: '2026-03-01T12:00:00Z',
+    updatedAt: '2026-03-01T12:00:00Z',
+    ...overrides,
+  }
+}
+
+export function challengePreview(overrides: Partial<ChallengePreview> = {}): ChallengePreview {
+  return {
+    isValid: true,
+    errors: {},
+    challengerPosition: 5,
+    challengedPosition: 3,
+    deadlineAt: '2026-03-16T02:59:59.999Z',
+    warnings: [],
     ...overrides,
   }
 }

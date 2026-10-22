@@ -28,9 +28,19 @@ const messages: Record<string, string> = {
   UnreadableImage: 'No se pudo leer la imagen.',
   // ranking warnings
   OutOfRange: 'Fuera de rango: el desafío es de más de 5 puestos o hacia abajo.',
-  PlayerNotRanked: 'Uno de los jugadores no estaba en el ranking en esa fecha.',
+  PlayerNotRanked: 'Uno de los jugadores no está en el ranking (o no estaba en esa fecha).',
   InvalidWinner: 'El ganador no es uno de los dos jugadores.',
   PlayerAlreadyRanked: 'El jugador ya estaba en el ranking.',
+  // challenges
+  BeforeIssuedAt: 'No puede ser anterior a la fecha del desafío.',
+  AfterDeadline: 'No puede ser posterior al vencimiento del desafío.',
+  ChallengeNotFound: 'No se encontró el desafío.',
+  ChallengeNotActive: 'Ese desafío ya no está abierto.',
+  PlayersDoNotMatch: 'Los jugadores no coinciden con los del desafío.',
+  LinkedChallengeMismatch: 'Este partido cerró un desafío: tiene que seguir siendo entre esos dos jugadores.',
+  ChallengeWarningsRequireConfirmation: 'El desafío tiene advertencias. Confirmá que querés guardarlo igual.',
+  AlreadyChallengedThisWeek: 'Alguno de los dos ya tiene un desafío esta semana.',
+  OutsideChallengeWindow: 'Se desafía de lunes a miércoles; este es de jueves a domingo.',
   // problems
   InvalidCredentials: 'Usuario o contraseña incorrectos.',
   OutOfRangeConfirmationRequired: 'El desafío está fuera de rango. Confirmá que querés guardarlo igual.',

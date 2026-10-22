@@ -1,5 +1,5 @@
-import type { Match, RankingRow } from '../api/types'
-import { formatDate } from './format'
+import type { Challenge, Match, RankingRow } from '../api/types'
+import { formatDate, formatDayMonth } from './format'
 
 /** WhatsApp bold is *text*; the messages stay plain text so they paste the same everywhere. */
 
@@ -17,6 +17,20 @@ export function matchMessage(m: MessageMatch): string {
   const lines = ['🎾 *Resultado*', resultSentence(m)]
   if (m.movementText) lines.push(m.movementText)
   return lines.join('\n')
+}
+
+/** What a message needs from a challenge: satisfied by both the public and the admin challenge. */
+export type MessageChallenge = Pick<Challenge, 'challenger' | 'challenged' | 'challengerPosition' | 'challengedPosition' | 'deadlineAt'>
+
+const withPosition = (player: { fullName: string }, position: number | null) => (position === null ? player.fullName : `#${position} ${player.fullName}`)
+
+/** A new challenge, ready to paste in the group. */
+export function challengeMessage(c: MessageChallenge): string {
+  return [
+    '🎾 *Desafío*',
+    `${withPosition(c.challenger, c.challengerPosition)} vs ${withPosition(c.challenged, c.challengedPosition)}`,
+    `Vence el ${formatDayMonth(c.deadlineAt)}`,
+  ].join('\n')
 }
 
 interface RankingMessageInput {

@@ -11,6 +11,7 @@ const fieldNames: Record<string, string> = {
   winner: 'Ganador',
   notes: 'Observaciones',
   match: 'Partido',
+  challengeId: 'Desafío',
 }
 
 interface Props {

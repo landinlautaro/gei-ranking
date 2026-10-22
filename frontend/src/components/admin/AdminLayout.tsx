@@ -44,6 +44,7 @@ export function AdminLayout() {
         </div>
         <nav aria-label="Administración" className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 pb-2">
           <NavLink to="/admin/results/new" className={navClass}>Cargar resultado</NavLink>
+          <NavLink to="/admin/challenges" className={navClass}>Desafíos</NavLink>
           <NavLink to="/admin/matches" className={navClass}>Partidos</NavLink>
           <NavLink to="/admin/players" className={navClass}>Jugadores</NavLink>
           <NavLink to="/admin/share" className={navClass}>Publicar</NavLink>

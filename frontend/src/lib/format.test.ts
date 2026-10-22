@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { avatarUri } from './avatar'
-import { formatDate, movementDescription, normalizeText, ownMovementDescription, percentage, streakDescription } from './format'
+import {
+  clubDateTimeInput,
+  clubDateTimeIso,
+  clubEndOfDayIso,
+  formatDate,
+  formatDayMonth,
+  formatDayMonthTime,
+  movementDescription,
+  normalizeText,
+  ownMovementDescription,
+  percentage,
+  streakDescription,
+} from './format'
 
 describe('formatDate', () => {
   it('muestra dd/mm/aaaa en la zona horaria del club', () => {
@@ -52,5 +64,27 @@ describe('avatarUri', () => {
   it('hay varios avatares distintos', () => {
     const uris = new Set([1, 2, 3, 4, 5, 6, 7, 8].map(avatarUri))
     expect(uris.size).toBeGreaterThan(1)
+  })
+})
+
+describe('fechas del club para desafíos', () => {
+  it('formatDayMonth da día de la semana, día y mes en hora del club', () => {
+    expect(formatDayMonth('2026-10-26T02:59:59.999Z')).toBe('dom 25/10')
+    expect(formatDayMonthTime('2026-10-22T22:00:00Z')).toBe('jue 22/10 19:00')
+  })
+
+  it('clubDateTimeInput y clubDateTimeIso son inversas', () => {
+    const iso = clubDateTimeIso('2026-10-23T19:00')
+
+    expect(iso).toBe('2026-10-23T19:00:00-03:00')
+    expect(clubDateTimeInput(iso)).toBe('2026-10-23T19:00')
+  })
+
+  it('la medianoche del club es 00:00, nunca 24:00', () => {
+    expect(clubDateTimeInput('2026-10-23T03:00:00Z')).toBe('2026-10-23T00:00')
+  })
+
+  it('el fin del día del club es el último milisegundo', () => {
+    expect(new Date(clubEndOfDayIso('2026-10-25')).toISOString()).toBe('2026-10-26T02:59:59.999Z')
   })
 })

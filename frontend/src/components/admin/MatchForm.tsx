@@ -1,18 +1,18 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAdminPlayers, useCreateMatch, useMatchPreview, useUpdateMatch } from '../../api/admin'
-import type { AdminMatch, MatchChangeResult } from '../../api/adminTypes'
+import type { AdminChallenge, AdminMatch, MatchChangeResult } from '../../api/adminTypes'
 import type { Completion } from '../../api/types'
 import { CHALLENGE_RANGE } from '../../lib/challenge'
 import { describeError, fieldErrors } from '../../lib/errors'
 import { isSevenSix, isValidSet, parseCount } from '../../lib/score'
-import { plural } from '../../lib/format'
+import { formatDayMonth, plural } from '../../lib/format'
 import { useDebouncedValue } from '../../lib/useDebouncedValue'
 import { matchMessage } from '../../lib/whatsapp'
 import { CopyButton } from '../CopyButton'
 import { ErrorState, LoadingState } from '../PageState'
 import { Button, Field, inputClass, Notice } from '../ui'
-import { emptyState, needsSuperTieBreak, stateFromMatch, toInput, type FormState, type SetFields } from './matchFormModel'
+import { emptyState, needsSuperTieBreak, stateFromChallenge, stateFromMatch, toInput, type FormState, type SetFields } from './matchFormModel'
 import { MatchPreviewPanel } from './MatchPreviewPanel'
 
 const PREVIEW_DELAY_MS = 350
@@ -26,12 +26,14 @@ const completions: { value: Completion; label: string }[] = [
 interface MatchFormProps {
   /** Present when editing: the form starts from this match and saves with PUT. */
   match?: AdminMatch
+  /** Present when loading the result of an open challenge: its players are fixed and saving settles it. */
+  challenge?: AdminChallenge
 }
 
-export function MatchForm({ match }: MatchFormProps) {
+export function MatchForm({ match, challenge }: MatchFormProps) {
   const editing = match !== undefined
   const players = useAdminPlayers()
-  const [state, setState] = useState<FormState>(() => (match ? stateFromMatch(match) : emptyState()))
+  const [state, setState] = useState<FormState>(() => (match ? stateFromMatch(match) : challenge ? stateFromChallenge(challenge) : emptyState()))
   const [saved, setSaved] = useState<MatchChangeResult | null>(null)
 
   const create = useCreateMatch()
@@ -58,7 +60,7 @@ export function MatchForm({ match }: MatchFormProps) {
     return map
   }, [players.data])
 
-  const currentInput = toInput(state, match?.playedAt)
+  const currentInput = toInput(state, match?.playedAt, false, challenge?.id)
   // Preview ignores the confirmation checkbox: it is the answer to the preview, not an input to it.
   const previewInput = useDebouncedValue(currentInput, PREVIEW_DELAY_MS)
   const preview = useMatchPreview(previewInput, match?.id ?? null)
@@ -81,7 +83,7 @@ export function MatchForm({ match }: MatchFormProps) {
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    const input = toInput(state, match?.playedAt, state.confirmOutOfRange)
+    const input = toInput(state, match?.playedAt, state.confirmOutOfRange, challenge?.id)
     if (!input || !canSave) return
     mutation.mutate(input, { onSuccess: (result) => setSaved(result) })
   }
@@ -90,7 +92,14 @@ export function MatchForm({ match }: MatchFormProps) {
   if (players.isError) return <ErrorState error={players.error} onRetry={() => void players.refetch()} />
 
   if (saved) {
-    return <SavedPanel result={saved} editing={editing} onAnother={() => { setSaved(null); setState({ ...emptyState(), date: state.date }); create.reset() }} />
+    return (
+      <SavedPanel
+        result={saved}
+        editing={editing}
+        fromChallenge={challenge !== undefined}
+        onAnother={() => { setSaved(null); setState({ ...emptyState(), date: state.date }); create.reset() }}
+      />
+    )
   }
 
   const playerOption = (id: number, name: string, position: number | null) => (
@@ -106,17 +115,23 @@ export function MatchForm({ match }: MatchFormProps) {
 
   return (
     <form onSubmit={submit} className="space-y-6" noValidate>
+      {challenge && (
+        <Notice tone="info">
+          Este resultado cierra el desafío de {challenge.challenger.fullName} a {challenge.challenged.fullName} (vence el {formatDayMonth(challenge.deadlineAt)}).
+          Si no se jugó, cargalo como W.O.
+        </Notice>
+      )}
       <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className="mb-2 text-lg font-semibold">Jugadores</legend>
         <Field label="Desafiante" error={serverErrors.challengerId}>
-          <select className={inputClass} value={state.challengerId} onChange={(e) => set('challengerId', e.target.value)}>
+          <select className={inputClass} value={state.challengerId} disabled={challenge !== undefined} onChange={(e) => set('challengerId', e.target.value)}>
             <option value="">Elegí un jugador…</option>
             {options.ranked.map((p) => playerOption(p.id, p.fullName, p.position))}
             {options.extra.map((p) => playerOption(p.id, p.fullName, null))}
           </select>
         </Field>
         <Field label="Desafiado" error={serverErrors.challengedId} hint={challengedHint}>
-          <select className={inputClass} value={state.challengedId} onChange={(e) => set('challengedId', e.target.value)}>
+          <select className={inputClass} value={state.challengedId} disabled={challenge !== undefined} onChange={(e) => set('challengedId', e.target.value)}>
             <option value="">Elegí un jugador…</option>
             {options.ranked.filter((p) => String(p.id) !== state.challengerId).map((p) => playerOption(p.id, p.fullName, p.position))}
             {options.extra.filter((p) => String(p.id) !== state.challengerId).map((p) => playerOption(p.id, p.fullName, null))}
@@ -282,7 +297,7 @@ function SetRow({ label, value, onChange, partial }: { label: string; value: Set
   )
 }
 
-function SavedPanel({ result, editing, onAnother }: { result: MatchChangeResult; editing: boolean; onAnother: () => void }) {
+function SavedPanel({ result, editing, fromChallenge, onAnother }: { result: MatchChangeResult; editing: boolean; fromChallenge: boolean; onAnother: () => void }) {
   const { match, newlyWarnedMatchIds } = result
   return (
     <div className="space-y-4">
@@ -302,7 +317,12 @@ function SavedPanel({ result, editing, onAnother }: { result: MatchChangeResult;
       )}
       <CopyButton label="Copiar para WhatsApp" variant="secondary" getText={() => matchMessage(match)} />
       <div className="flex flex-wrap gap-3">
-        {!editing && <Button onClick={onAnother}>Cargar otro resultado</Button>}
+        {!editing && !fromChallenge && <Button onClick={onAnother}>Cargar otro resultado</Button>}
+        {fromChallenge && (
+          <Link to="/admin/challenges" className="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100">
+            Ver desafíos
+          </Link>
+        )}
         <Link to="/admin/matches" className="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100">
           Ver partidos
         </Link>

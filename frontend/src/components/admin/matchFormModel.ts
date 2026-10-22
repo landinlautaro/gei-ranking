@@ -1,4 +1,4 @@
-import type { AdminMatch, MatchInput, MatchScore, MatchSide, SetScore } from '../../api/adminTypes'
+import type { AdminChallenge, AdminMatch, MatchInput, MatchScore, MatchSide, SetScore } from '../../api/adminTypes'
 import type { Completion } from '../../api/types'
 import { clubDateInput, clubNoonIso, todayClubDate } from '../../lib/format'
 import { isSevenSix, isSplit, parseCount } from '../../lib/score'
@@ -52,6 +52,11 @@ const setFields = (s: SetScore | undefined): SetFields =>
       }
     : emptySet
 
+/** A new result for an open challenge: the two players are already known. */
+export function stateFromChallenge(challenge: AdminChallenge): FormState {
+  return { ...emptyState(), challengerId: String(challenge.challenger.id), challengedId: String(challenge.challenged.id) }
+}
+
 export function stateFromMatch(match: AdminMatch): FormState {
   const stb = match.score.superTieBreak
   return {
@@ -91,13 +96,21 @@ export const needsSuperTieBreak = (state: FormState) => isSplit(parsedSet(state.
  * The request for the preview/save, or null while the form is not complete enough to evaluate.
  * <paramref name="originalPlayedAt"/> is kept when editing and the date was not touched, so the time of day survives.
  */
-export function toInput(state: FormState, originalPlayedAt?: string, allowOutOfRange = false): MatchInput | null {
+export function toInput(state: FormState, originalPlayedAt?: string, allowOutOfRange = false, challengeId?: number): MatchInput | null {
   const challengerId = Number(state.challengerId)
   const challengedId = Number(state.challengedId)
   if (!challengerId || !challengedId || !state.date) return null
 
   const playedAt = originalPlayedAt && clubDateInput(originalPlayedAt) === state.date ? originalPlayedAt : clubNoonIso(state.date)
-  const base = { challengerId, challengedId, playedAt, completion: state.completion, notes: state.notes.trim() || null, allowOutOfRange }
+  const base = {
+    challengerId,
+    challengedId,
+    playedAt,
+    completion: state.completion,
+    notes: state.notes.trim() || null,
+    allowOutOfRange,
+    ...(challengeId === undefined ? {} : { challengeId }),
+  }
 
   if (state.completion === 'Walkover') {
     return state.winner ? { ...base, score: null, winner: state.winner } : null

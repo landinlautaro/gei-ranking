@@ -1,4 +1,4 @@
-import type { Completion, PlayerProfile, PlayerRef } from './types'
+import type { Challenge, Completion, PlayerProfile, PlayerRef } from './types'
 
 export type MatchSide = 'Challenger' | 'Challenged'
 export type MatchStatus = 'Valid' | 'Voided'
@@ -56,6 +56,8 @@ export interface MatchInput {
   winner: MatchSide | null
   notes: string | null
   allowOutOfRange: boolean
+  /** Active challenge this result settles (only when creating). */
+  challengeId?: number | null
 }
 
 export interface AdminMatch {
@@ -106,6 +108,52 @@ export interface AdminMatchFilters {
   to?: string
   status?: MatchStatus
   withWarnings?: boolean
+  page?: number
+  pageSize?: number
+}
+
+// ---- Challenges ----
+
+export type ChallengeWarning = 'OutOfRange' | 'AlreadyChallengedThisWeek' | 'OutsideChallengeWindow'
+export type ChallengeFilter = 'Active' | 'Expired' | 'Pending' | 'Scheduled' | 'Played' | 'Cancelled'
+
+/** A challenge with what only the admin sees (notes). */
+export interface AdminChallenge extends Challenge {
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ChallengeInput {
+  challengerId: number
+  challengedId: number
+  /** null = now. */
+  issuedAt: string | null
+  scheduledAt: string | null
+  notes: string | null
+  confirmWarnings: boolean
+}
+
+export interface ChallengeUpdate {
+  issuedAt: string
+  deadlineAt: string
+  /** null clears the agreed date. */
+  scheduledAt: string | null
+  notes: string | null
+}
+
+export interface ChallengePreview {
+  isValid: boolean
+  errors: Record<string, string[]>
+  challengerPosition: number | null
+  challengedPosition: number | null
+  deadlineAt: string | null
+  warnings: ChallengeWarning[]
+}
+
+export interface AdminChallengeFilters {
+  status?: ChallengeFilter
+  playerId?: number
   page?: number
   pageSize?: number
 }

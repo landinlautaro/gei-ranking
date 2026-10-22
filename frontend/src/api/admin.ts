@@ -8,9 +8,14 @@ import {
 import { request } from './client'
 import type {
   AdjustmentResult,
+  AdminChallenge,
+  AdminChallengeFilters,
   AdminMatch,
   AdminMatchFilters,
   AdminPlayer,
+  ChallengeInput,
+  ChallengePreview,
+  ChallengeUpdate,
   LoginResponse,
   MatchChangeResult,
   MatchInput,
@@ -158,6 +163,60 @@ export function useVoidMatch() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => request<MatchChangeResult>('POST', admin(`/matches/${id}/void`), { auth: true }),
+    onSuccess: () => invalidateEverything(client),
+  })
+}
+
+// ---- Challenges ----
+
+export function useAdminChallenges(filters: AdminChallengeFilters) {
+  return useQuery({
+    queryKey: ['admin', 'challenges', filters],
+    queryFn: ({ signal }) => request<Paged<AdminChallenge>>('GET', admin('/challenges'), { auth: true, params: { ...filters }, signal }),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useAdminChallenge(id: number | null) {
+  return useQuery({
+    queryKey: ['admin', 'challenge', id],
+    queryFn: ({ signal }) => request<AdminChallenge>('GET', admin(`/challenges/${id}`), { auth: true, signal }),
+    enabled: id !== null,
+  })
+}
+
+/** Live preview: positions, deadline and warnings, without saving. Nothing is cached between edits. */
+export function useChallengePreview(input: ChallengeInput | null) {
+  return useQuery({
+    queryKey: ['admin', 'challenge-preview', input],
+    queryFn: ({ signal }) => request<ChallengePreview>('POST', admin('/challenges/preview'), { auth: true, body: input, signal }),
+    enabled: input !== null,
+    placeholderData: keepPreviousData,
+    staleTime: 0,
+    gcTime: 0,
+  })
+}
+
+export function useCreateChallenge() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: ChallengeInput) => request<AdminChallenge>('POST', admin('/challenges'), { auth: true, body: input }),
+    onSuccess: () => invalidateEverything(client),
+  })
+}
+
+export function useUpdateChallenge(id: number) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: ChallengeUpdate) => request<AdminChallenge>('PUT', admin(`/challenges/${id}`), { auth: true, body: input }),
+    onSuccess: () => invalidateEverything(client),
+  })
+}
+
+export function useCancelChallenge() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => request<AdminChallenge>('POST', admin(`/challenges/${id}/cancel`), { auth: true, body: { reason: null } }),
     onSuccess: () => invalidateEverything(client),
   })
 }

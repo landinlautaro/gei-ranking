@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { match, player, rankingRow } from '../test-utils'
-import { matchMessage, rankingMessage } from './whatsapp'
+import { challenge, match, player, rankingRow } from '../test-utils'
+import { challengeMessage, matchMessage, rankingMessage } from './whatsapp'
 
 const ana = player(1, 'Ana Gómez')
 const beto = player(2, 'Beto Pérez')
@@ -22,6 +22,20 @@ describe('matchMessage', () => {
     const m = match(1, beto, ana, beto, { completion: 'Walkover', result: 'W.O.', movementText: null })
 
     expect(matchMessage(m)).toContain('Beto Pérez le ganó a Ana Gómez por W.O.')
+  })
+})
+
+describe('challengeMessage', () => {
+  it('dice quién desafía a quién, con los puestos y cuándo vence', () => {
+    const c = challenge(1, beto, ana, { challengerPosition: 8, challengedPosition: 5, deadlineAt: '2026-10-26T02:59:59.999Z' })
+
+    expect(challengeMessage(c)).toBe('🎾 *Desafío*\n#8 Beto Pérez vs #5 Ana Gómez\nVence el dom 25/10')
+  })
+
+  it('sin puesto (fuera del ranking) deja solo el nombre', () => {
+    const c = challenge(1, beto, ana, { challengerPosition: null, deadlineAt: '2026-10-26T02:59:59.999Z' })
+
+    expect(challengeMessage(c)).toContain('Beto Pérez vs #5 Ana Gómez')
   })
 })
 

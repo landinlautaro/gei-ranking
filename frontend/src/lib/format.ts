@@ -26,7 +26,8 @@ const dayMonthFormat = new Intl.DateTimeFormat('es-AR', {
   month: '2-digit',
 })
 
-const timeFormat = new Intl.DateTimeFormat('es-AR', { timeZone: CLUB_TIME_ZONE, hour: '2-digit', minute: '2-digit', hour12: false })
+// h23: midnight is "00:00", never "24:00".
+const timeFormat = new Intl.DateTimeFormat('es-AR', { timeZone: CLUB_TIME_ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
 
 /** "dom 26/10" in club local time. */
 export function formatDayMonth(iso: string): string {
@@ -95,4 +96,19 @@ export function todayClubDate(): string {
 /** The club is on a fixed UTC-3 (no daylight saving). A date picked in a form is stored at noon club time. */
 export function clubNoonIso(date: string): string {
   return `${date}T12:00:00-03:00`
+}
+
+/** Last instant of a club-local day: where a challenge deadline sits. */
+export function clubEndOfDayIso(date: string): string {
+  return `${date}T23:59:59.999-03:00`
+}
+
+/** Value for an `<input type="datetime-local">` ("2026-10-23T19:00") of an instant, in club local time. */
+export function clubDateTimeInput(iso: string): string {
+  return `${clubDateInput(iso)}T${timeFormat.format(new Date(iso))}`
+}
+
+/** Instant for a `datetime-local` value, read as club local time. */
+export function clubDateTimeIso(value: string): string {
+  return `${value}:00-03:00`
 }

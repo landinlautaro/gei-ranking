@@ -18,6 +18,8 @@ const AdminMatchesPage = lazy(() => import('./pages/admin/AdminMatchesPage').the
 const AdminPlayersPage = lazy(() => import('./pages/admin/AdminPlayersPages').then((m) => ({ default: m.AdminPlayersPage })))
 const NewPlayerPage = lazy(() => import('./pages/admin/AdminPlayersPages').then((m) => ({ default: m.NewPlayerPage })))
 const EditPlayerPage = lazy(() => import('./pages/admin/AdminPlayersPages').then((m) => ({ default: m.EditPlayerPage })))
+const AdminChallengesPage = lazy(() => import('./pages/admin/AdminChallengesPage').then((m) => ({ default: m.AdminChallengesPage })))
+const NewChallengePage = lazy(() => import('./pages/admin/AdminChallengesPage').then((m) => ({ default: m.NewChallengePage })))
 const SharePage = lazy(() => import('./pages/admin/SharePage').then((m) => ({ default: m.SharePage })))
 const AdjustmentPage =lazy(() => import('./pages/admin/AdjustmentPage').then((m) => ({ default: m.AdjustmentPage })))
 
@@ -39,6 +41,8 @@ export default function App() {
       <Route path="admin" element={<Suspense fallback={loading}><AdminLayout /></Suspense>}>
         <Route index element={<Navigate to="results/new" replace />} />
         <Route path="results/new" element={<NewResultPage />} />
+        <Route path="challenges" element={<AdminChallengesPage />} />
+        <Route path="challenges/new" element={<NewChallengePage />} />
         <Route path="matches" element={<AdminMatchesPage />} />
         <Route path="matches/:id/edit" element={<EditMatchPage />} />
         <Route path="players" element={<AdminPlayersPage />} />
