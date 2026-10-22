@@ -103,6 +103,7 @@ Sin login. Documentación interactiva en `/swagger` (solo en desarrollo).
 | `GET /api/players` | Jugadores ordenados por nombre (`?includeInactive=true` incluye bajas). |
 | `GET /api/players/{id}` | Perfil: datos, estadísticas (incluye defensas, % de victorias, racha, mejor posición), a quiénes puede desafiar y evolución de posición. |
 | `GET /api/matches` | Partidos válidos, del más nuevo al más viejo. Filtros: `playerId`, `from`, `to` (`yyyy-MM-dd`, inclusivos, en hora del club), `page`, `pageSize` (máx. 100). |
+| `GET /api/challenges` | Desafíos abiertos en plazo (`active`), abiertos vencidos (`expired`) y jugados en los últimos 7 días (`recentlyPlayed`). Los cancelados y las observaciones del coordinador no son públicos. El perfil de un jugador (`/api/players/{id}`) trae sus `activeChallenges`. |
 
 ## API de administración (Fase 4)
 Todo lo de `/api/admin/*` exige un JWT de administrador; sin token (o con uno vencido o inválido) responde 401. Los errores de negocio vuelven como `application/problem+json` con un `code` estable (y `errors` por campo, con códigos) que la interfaz traduce.
@@ -135,6 +136,9 @@ El login tiene límite de intentos (10 por minuto por IP, configurable con `Rate
 | `PUT /api/admin/matches/{id}` · `POST /api/admin/matches/{id}/void` | Editar y anular, con recálculo. Los partidos posteriores que queden fuera de rango no se bloquean: se marcan (`warning`) y la respuesta trae `newlyWarnedMatchIds`. |
 | `GET /api/admin/matches` | Todos los partidos, también anulados. Filtros: `playerId`, `from`, `to`, `status`, `withWarnings`. |
 | `POST /api/admin/ranking/adjustments` | Mueve a un jugador a otra posición. El motivo es obligatorio. |
+| `GET /api/admin/challenges` | Desafíos, del más nuevo al más viejo. Filtros: `status` (`Active`, `Expired`, `Pending`, `Scheduled`, `Played`, `Cancelled`), `playerId`, `weekOf`. |
+| `POST /api/admin/challenges/preview` · `POST /api/admin/challenges` | Vista previa (posiciones, plazo y advertencias) y alta. Con advertencias el alta devuelve 409 `ChallengeWarningsRequireConfirmation` hasta reenviar con `confirmWarnings: true`. |
+| `PUT /api/admin/challenges/{id}` · `POST /api/admin/challenges/{id}/cancel` | Editar plazo, día y hora acordados y observaciones de un desafío abierto, y cancelarlo (queda en el historial). |
 
 Las fotos viven detrás de `IPhotoStorage` (hoy `LocalPhotoStorage`, en disco): para pasar a un servicio de archivos alcanza con otra implementación.
 
@@ -147,10 +151,21 @@ Entrar a `http://localhost:5173/admin` (hay un enlace "Administración" al pie d
 | **Partidos** (`/admin/matches`) | Listado con filtros (jugador, estado, fechas, solo con advertencias; quedan en la URL), edición y anulación con confirmación. Los partidos que quedan fuera de rango tras un cambio se marcan, no se bloquean. |
 | **Jugadores** (`/admin/players`) | Alta (al final o en una posición), edición de datos, foto (JPEG/PNG/WebP hasta 5 MB), baja lógica y reingreso. |
 | **Ajustes** (`/admin/adjustments`) | Mover a un jugador a otra posición con motivo obligatorio. |
+| **Desafíos** (`/admin/challenges`) | Registrar un desafío (con vista previa del plazo y de las advertencias), coordinar día y hora, extender el plazo, cancelar, copiar el mensaje para el grupo y **Cargar resultado**, que abre el formulario con los dos jugadores fijos y, al guardar, marca el desafío como jugado. |
 
 La fecha de un partido se guarda al mediodía en hora del club (UTC-3 fijo, sin horario de verano). Al editar un partido sin cambiar la fecha se conserva la hora original. Los mensajes de error de la API se traducen en `frontend/src/lib/errors.ts` a partir de sus códigos estables.
 
 En desarrollo Vite reenvía `/api` y `/photos` a la API. Los tests de la interfaz (`npm test --prefix frontend`) usan una API simulada; además se verificó el recorrido completo contra la API real con un navegador (login, carga con vista previa, anulación, fuera de rango, edición, foto, baja, ajuste y sesión vencida).
+
+## Desafíos (Fase 7a)
+Siguen el ciclo semanal del reglamento v2: se desafía de lunes a miércoles y el desafío **vence el domingo a las 23:59:59.999 (hora del club)** de esa semana. El plazo se guarda al crearlo, así que cambiar la regla no mueve los desafíos viejos; el coordinador puede extenderlo. "Vencido" no se guarda: es un desafío abierto cuyo plazo ya pasó, y no pasa nada automático (el coordinador decide, por ejemplo cargando un W.O.).
+
+- **No son eventos del ranking.** El motor no cambia: el ranking solo se mueve cuando se carga el partido, y el desafío queda vinculado a él. El partido y el cierre del desafío se guardan en la misma transacción.
+- **Advertencias, no bloqueos** (el admin confirma): fuera del rango de 5 puestos (contra el ranking vigente), de jueves a domingo, y alguno de los dos ya tiene otro desafío esa semana. Bloquea que algún jugador no esté en el ranking.
+- **Anular el partido** de un desafío jugado lo reabre (vuelve a pendiente o coordinado). Un partido que cerró un desafío no puede cambiar de jugadores al editarlo.
+- Las reglas viven en `GeiRanking.Domain/Challenges/ChallengeRules.cs`.
+
+Al agregar esta fase hay una migración nueva (`AddChallenges`): aplicarla con `dotnet ef database update ...` o `dotnet run --project backend/src/GeiRanking.Api -- migrate`.
 
 ## Despliegue y operación (Fase 6)
 La guía paso a paso para publicar la aplicación (Neon + Fly.io + Cloudflare Pages, o un servidor propio con Docker) está en **[`docs/DEPLOY.md`](docs/DEPLOY.md)**. Incluye la creación de la base, las migraciones, la carga inicial, el administrador, los backups programados y cómo restaurarlos.

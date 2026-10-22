@@ -14,7 +14,4 @@ public sealed record ChallengeRules(DayOfWeek LastDayToChallenge = DayOfWeek.Wed
         var offset = ClubClock.ToClubDate(issuedAt).DayNumber - ClubClock.WeekStart(issuedAt).DayNumber;
         return offset <= ((int)LastDayToChallenge + 6) % 7;
     }
-
-    /// <summary>Whether two instants fall in the same Monday-to-Sunday club week.</summary>
-    public static bool SameWeek(DateTimeOffset a, DateTimeOffset b) => ClubClock.WeekStart(a) == ClubClock.WeekStart(b);
 }

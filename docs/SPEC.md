@@ -60,7 +60,7 @@ El ranking es una lista ordenada de posiciones (1, 2, 3…). **No hay puntos.**
 **Desafíos**
 - Un jugador solo puede desafiar a alguien que esté entre 1 y 5 puestos por encima suyo. Ejemplo: el #20 puede desafiar del #15 al #19.
 - No se puede desafiar hacia abajo.
-- El desafiado tiene 7 días para jugar el partido.
+- El desafiado tiene 7 días para jugar el partido. (Reglamento v2: se desafía de lunes a miércoles y el partido se juega hasta el domingo de esa semana; ver Fase 7.)
 
 **Movimiento de posiciones**
 - **Gana el desafiante:** intercambia su posición con el desafiado. Ej.: #20 le gana a #17 → el desafiante pasa a #17 y el desafiado a #20.
@@ -259,6 +259,15 @@ Revisión de accesibilidad y responsive, manejo de errores, logs, Dockerfiles de
 
 ### Fase 7 (opcional, posterior) — Gestión de desafíos
 Registrar desafíos pendientes (desafiante, desafiado, fecha), mostrarlos en una sección pública con cuenta regresiva de los 7 días, marcar vencidos y convertir un desafío en partido al cargar el resultado. Solo arrancar esta fase si te lo pido explícitamente.
+
+**Decisiones de la Fase 7a (el admin registra, la web muestra)**, que reemplazan los "7 días" por el ciclo semanal del reglamento v2:
+- Plazo: vence el domingo 23:59 (hora del club) de la semana en que se desafió; se guarda al crear y el admin puede extenderlo.
+- Vencido es derivado (abierto y pasado el plazo), no un estado guardado; no se aplica nada automático.
+- Rango de 5 puestos contra el ranking vigente; "1 desafío por semana" y "solo de lunes a miércoles" se advierten, no se bloquean.
+- Los desafíos no son eventos del ranking; se vinculan al partido en la misma transacción que lo crea. Anular el partido reabre el desafío.
+- Extras: estado "coordinado" (día y hora), desafíos en el post del lunes, mensaje del desafío para copiar y desafíos abiertos en el perfil.
+
+**Fase 7b (pendiente):** que los jugadores creen y coordinen sus desafíos desde la web con un código personal (6 caracteres, login por jugador + código, JWT de rol Player, revocable). Las advertencias pasan a bloqueos para el jugador.
 
 ## 10. Cómo trabajar
 

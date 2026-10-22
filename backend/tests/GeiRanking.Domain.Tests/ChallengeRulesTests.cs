@@ -49,13 +49,6 @@ public class ChallengeRulesTests
         Assert.Equal(expected, Rules.IsWithinChallengeWindow(Club(day, hour)));
 
     [Fact]
-    public void SameWeek_SplitsAtMondayMidnightClubTime()
-    {
-        Assert.True(ChallengeRules.SameWeek(Club(19, 0), Club(25, 23)));
-        Assert.False(ChallengeRules.SameWeek(Club(25, 23), Club(26, 0)));
-    }
-
-    [Fact]
     public void IsExpired_OnlyForActiveChallengesPastTheDeadline()
     {
         var deadline = Rules.DeadlineFor(Club(20, 10));
