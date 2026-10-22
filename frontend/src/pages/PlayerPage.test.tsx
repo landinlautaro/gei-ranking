@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { clearMe, getMe, setMe } from '../lib/meStore'
-import { match, mockApi, player, profile, rankingRow, renderApp } from '../test-utils'
+import { challenge, match, mockApi, player, profile, rankingRow, renderApp } from '../test-utils'
 
 const juan = player(5, 'Juan Perez', 'Juancho')
 const rival = player(3, 'Rival Tres')
@@ -158,6 +158,51 @@ describe('PlayerPage', () => {
 
       expect(await screen.findByText('Todavía no jugaron entre ustedes.')).toBeInTheDocument()
       expect(screen.getByText(/Están a más de 5 puestos/)).toBeInTheDocument()
+    })
+
+    describe('con desafíos abiertos', () => {
+      const routes = (board: unknown) => ({
+        '/api/players/5': profile(juan, { position: 5 }),
+        '/api/players/3': profile(rival, { position: 3 }),
+        '/api/matches': { items: [], total: 0, page: 1, pageSize: 100 },
+        '/api/challenges': board,
+      })
+      const open = (challenger: ReturnType<typeof player>, challenged: ReturnType<typeof player>) => ({
+        active: [challenge(1, challenger, challenged)],
+        expired: [],
+        recentlyPlayed: [],
+      })
+
+      it('deja la tarjeta en gris si el rival ya tiene un desafío abierto', async () => {
+        setMe(5)
+        mockApi(routes(open(rival, other)))
+        renderApp('/players/3')
+
+        const section = (await screen.findByRole('heading', { name: 'Vos vs Rival Tres' })).closest('section')!
+        expect(await within(section).findByText('Rival Tres ya tiene un desafío abierto.')).toBeInTheDocument()
+        expect(section).toHaveClass('bg-slate-100')
+        expect(within(section).queryByText('Lo podés desafiar.')).not.toBeInTheDocument()
+      })
+
+      it('también si el que tiene el desafío abierto sos vos', async () => {
+        setMe(5)
+        mockApi(routes(open(other, juan)))
+        renderApp('/players/3')
+
+        const section = (await screen.findByRole('heading', { name: 'Vos vs Rival Tres' })).closest('section')!
+        expect(await within(section).findByText('Ya tenés un desafío abierto.')).toBeInTheDocument()
+        expect(section).toHaveClass('bg-slate-100')
+      })
+
+      it('sin desafíos abiertos la tarjeta sigue como siempre', async () => {
+        setMe(5)
+        mockApi(routes({ active: [], expired: [], recentlyPlayed: [challenge(2, rival, juan, { status: 'Played', matchId: 1 })] }))
+        renderApp('/players/3')
+
+        const section = (await screen.findByRole('heading', { name: 'Vos vs Rival Tres' })).closest('section')!
+        expect(await within(section).findByText('Lo podés desafiar.')).toBeInTheDocument()
+        expect(section).not.toHaveClass('bg-slate-100')
+      })
     })
 
     it('en el propio perfil no hay cara a cara', async () => {

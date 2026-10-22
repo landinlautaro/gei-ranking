@@ -113,7 +113,7 @@ export function PlayerPage() {
         </ul>
       </header>
 
-      {meId !== null && meId !== player.id && <HeadToHead meId={meId} rival={player} />}
+      {meId !== null && meId !== player.id && <HeadToHead meId={meId} rival={player} openChallengeIds={playersWithOpenChallenge} />}
 
       {player.activeChallenges.length > 0 && (
         <section aria-labelledby="open-challenges-title">
@@ -232,7 +232,7 @@ function StreakValue({ streak }: { streak: number }) {
 }
 
 /** "Vos vs X": shown when "Soy yo" is set and you look at someone else — the record between you and whether the challenge rule lets you play. */
-function HeadToHead({ meId, rival }: { meId: number; rival: PlayerProfile }) {
+function HeadToHead({ meId, rival, openChallengeIds }: { meId: number; rival: PlayerProfile; openChallengeIds: ReadonlySet<number> }) {
   const me = usePlayer(meId)
   const games = useMatches({ playerId: meId, opponentId: rival.id, pageSize: H2H_MATCHES })
 
@@ -244,15 +244,26 @@ function HeadToHead({ meId, rival }: { meId: number; rival: PlayerProfile }) {
   const relation =
     myPosition !== null && rival.position !== null ? RELATION_TEXT[challengeRelation(myPosition, rival.position)] : null
 
+  // Purely visual: if either of you is in an open challenge the card is greyed out, like the names in "who can be challenged".
+  const busyText = openChallengeIds.has(meId)
+    ? 'Ya tenés un desafío abierto.'
+    : openChallengeIds.has(rival.id)
+      ? `${rival.nickname ?? rival.fullName} ya tiene un desafío abierto.`
+      : null
+
   return (
-    <section aria-labelledby="h2h-title" className="rounded-lg border-2 border-brand bg-white p-4 shadow-sm">
+    <section
+      aria-labelledby="h2h-title"
+      className={`rounded-lg border-2 p-4 shadow-sm ${busyText ? 'border-slate-300 bg-slate-100 text-slate-600' : 'border-brand bg-white'}`}
+    >
       <h2 id="h2h-title" className="text-lg font-semibold">Vos vs {rival.nickname ?? rival.fullName}</h2>
       <p className="mt-1 text-lg">
         {games.data.items.length === 0
           ? 'Todavía no jugaron entre ustedes.'
           : `Ganaste ${wins} · Perdiste ${losses}`}
       </p>
-      {relation && <p className="mt-1 font-medium text-brand">{relation}</p>}
+      {busyText && <p className="mt-1 font-medium">{busyText}</p>}
+      {!busyText && relation && <p className="mt-1 font-medium text-brand">{relation}</p>}
       {games.data.items.length > 0 && (
         <ul className="mt-3 space-y-2">
           {games.data.items.slice(0, H2H_LISTED).map((m) => (
