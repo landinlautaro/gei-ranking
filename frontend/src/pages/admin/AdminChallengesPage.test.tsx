@@ -41,6 +41,20 @@ describe('Desafíos · administración', () => {
       expect(within(cancelled).queryByRole('button', { name: 'Cancelar desafío' })).not.toBeInTheDocument()
     })
 
+    it('"Copiar mensaje" incluye el día y la hora si ya está coordinado', async () => {
+      const writeText = vi.fn(async () => {})
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+      mockApi({
+        '/api/admin/players': players,
+        '/api/admin/challenges': page([adminChallenge(1, beto, ana, { status: 'Scheduled', scheduledAt: '2099-01-08T22:00:00Z' })]),
+      })
+      renderApp('/admin/challenges')
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Copiar mensaje' }))
+
+      expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Coordinado: jue 08/01 19:00'))
+    })
+
     it('"Cargar resultado" lleva al formulario con el desafío', async () => {
       mockApi({ '/api/admin/players': players, '/api/admin/challenges': page([adminChallenge(7, beto, ana)]) })
       renderApp('/admin/challenges')

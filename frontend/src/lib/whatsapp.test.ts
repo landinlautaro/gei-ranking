@@ -32,6 +32,18 @@ describe('challengeMessage', () => {
     expect(challengeMessage(c)).toBe('🎾 *Desafío*\n#8 Beto Pérez vs #5 Ana Gómez\nVence el dom 25/10')
   })
 
+  it('si ya está coordinado suma el día y la hora, antes del vencimiento', () => {
+    const c = challenge(1, beto, ana, {
+      challengerPosition: 8,
+      challengedPosition: 5,
+      status: 'Scheduled',
+      scheduledAt: '2026-10-22T22:00:00Z',
+      deadlineAt: '2026-10-26T02:59:59.999Z',
+    })
+
+    expect(challengeMessage(c)).toBe('🎾 *Desafío*\n#8 Beto Pérez vs #5 Ana Gómez\nCoordinado: jue 22/10 19:00\nVence el dom 25/10')
+  })
+
   it('sin puesto (fuera del ranking) deja solo el nombre', () => {
     const c = challenge(1, beto, ana, { challengerPosition: null, deadlineAt: '2026-10-26T02:59:59.999Z' })
 

@@ -20,17 +20,19 @@ export function matchMessage(m: MessageMatch): string {
 }
 
 /** What a message needs from a challenge: satisfied by both the public and the admin challenge. */
-export type MessageChallenge = Pick<Challenge, 'challenger' | 'challenged' | 'challengerPosition' | 'challengedPosition' | 'deadlineAt'>
+export type MessageChallenge = Pick<Challenge, 'challenger' | 'challenged' | 'challengerPosition' | 'challengedPosition' | 'deadlineAt' | 'scheduledAt'>
 
 const withPosition = (player: { fullName: string }, position: number | null) => (position === null ? player.fullName : `#${position} ${player.fullName}`)
 
-/** A new challenge, ready to paste in the group. */
+/** A challenge, ready to paste in the group. When the players already agreed on a day and time, it says so. */
 export function challengeMessage(c: MessageChallenge): string {
-  return [
+  const lines = [
     '🎾 *Desafío*',
     `${withPosition(c.challenger, c.challengerPosition)} vs ${withPosition(c.challenged, c.challengedPosition)}`,
-    `Vence el ${formatDayMonth(c.deadlineAt)}`,
-  ].join('\n')
+  ]
+  if (c.scheduledAt) lines.push(`Coordinado: ${formatDayMonthTime(c.scheduledAt)}`)
+  lines.push(`Vence el ${formatDayMonth(c.deadlineAt)}`)
+  return lines.join('\n')
 }
 
 interface RankingMessageInput {
