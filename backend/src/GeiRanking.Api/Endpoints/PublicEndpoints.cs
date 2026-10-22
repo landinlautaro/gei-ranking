@@ -1,5 +1,6 @@
 using GeiRanking.Api.Dtos;
 using GeiRanking.Domain;
+using GeiRanking.Domain.Challenges;
 using GeiRanking.Domain.Matches;
 using GeiRanking.Domain.Stats;
 using GeiRanking.Infrastructure;
@@ -14,6 +15,7 @@ public static class PublicEndpoints
     private const int DefaultPageSize = 20;
     private const int MaxPageSize = 100;
     private const int ChallengeRange = 5;
+    private const int RecentDays = 7;
 
     public static void MapPublicEndpoints(this IEndpointRouteBuilder app)
     {
@@ -34,6 +36,26 @@ public static class PublicEndpoints
         api.MapGet("/matches", GetMatches)
             .WithName("GetMatches")
             .WithSummary("Valid matches, newest first. Filter by player and by club-local date range (yyyy-MM-dd, inclusive).");
+
+        api.MapGet("/challenges", GetChallenges)
+            .WithName("GetChallenges")
+            .WithSummary("Open challenges (on time and expired) and the ones settled in the last 7 days. Cancelled ones are not public.");
+    }
+
+    private static async Task<Ok<ChallengeBoardDto>> GetChallenges(AppDbContext db, TimeProvider clock, CancellationToken ct)
+    {
+        var open = await PublicQueries.LoadActiveChallenges(db, clock, playerId: null, ct);
+
+        var since = clock.GetUtcNow().AddDays(-RecentDays);
+        var recent = await db.Challenges.AsNoTracking()
+            .Where(c => c.Status == ChallengeStatus.Played && c.UpdatedAt >= since)
+            .OrderByDescending(c => c.UpdatedAt).ThenByDescending(c => c.Id)
+            .ToListAsync(ct);
+
+        return TypedResults.Ok(new ChallengeBoardDto(
+            open.Where(c => !c.IsExpired).ToList(),
+            open.Where(c => c.IsExpired).ToList(),
+            await PublicQueries.ToChallengeDtos(db, clock, recent, ct)));
     }
 
     private static async Task<Ok<List<RankingRowDto>>> GetRanking(AppDbContext db, CancellationToken ct)
@@ -61,7 +83,7 @@ public static class PublicEndpoints
             .ToList());
     }
 
-    private static async Task<Results<Ok<PlayerProfileDto>, NotFound>> GetPlayer(int id, AppDbContext db, CancellationToken ct)
+    private static async Task<Results<Ok<PlayerProfileDto>, NotFound>> GetPlayer(int id, AppDbContext db, TimeProvider clock, CancellationToken ct)
     {
         var player = await db.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, ct);
         if (player is null)
@@ -96,7 +118,8 @@ public static class PublicEndpoints
             new PlayerStatsDto(stats.Played, stats.Wins, stats.Losses, stats.ChallengesWon, stats.ChallengesLost,
                 stats.DefensesWon, stats.DefensesLost, stats.WinPercentage, stats.CurrentStreak),
             canChallenge,
-            changes.Select(c => new PositionPointDto(c.OccurredAt, c.ToPosition)).ToList());
+            changes.Select(c => new PositionPointDto(c.OccurredAt, c.ToPosition)).ToList(),
+            await PublicQueries.LoadActiveChallenges(db, clock, id, ct));
 
         return TypedResults.Ok(dto);
     }

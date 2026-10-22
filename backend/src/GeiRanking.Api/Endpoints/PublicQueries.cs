@@ -1,4 +1,5 @@
 using GeiRanking.Api.Dtos;
+using GeiRanking.Domain.Challenges;
 using GeiRanking.Domain.Matches;
 using GeiRanking.Domain.Ranking;
 using GeiRanking.Domain.Stats;
@@ -42,6 +43,39 @@ internal static class PublicQueries
         var summary = StatsCalculator.SummarizePositions(history[player.Id].ToList(), position);
         return new RankingRowDto(position, player, s.Played, s.Wins, s.Losses, s.ChallengesWon, s.ChallengesLost,
             summary.PreviousPosition, summary.Movement);
+    }
+
+    /// <summary>Open challenges (pending or agreed), expired ones included, soonest deadline first. Optionally only those of one player.</summary>
+    public static async Task<List<PublicChallengeDto>> LoadActiveChallenges(
+        AppDbContext db, TimeProvider clock, int? playerId, CancellationToken ct)
+    {
+        var query = db.Challenges.AsNoTracking().Where(c => c.Status == ChallengeStatus.Pending || c.Status == ChallengeStatus.Scheduled);
+        if (playerId is { } pid)
+        {
+            query = query.Where(c => c.ChallengerId == pid || c.ChallengedId == pid);
+        }
+
+        var challenges = await query.OrderBy(c => c.DeadlineAt).ThenBy(c => c.Id).ToListAsync(ct);
+        return await ToChallengeDtos(db, clock, challenges, ct);
+    }
+
+    public static async Task<List<PublicChallengeDto>> ToChallengeDtos(
+        AppDbContext db, TimeProvider clock, IReadOnlyList<Challenge> challenges, CancellationToken ct)
+    {
+        if (challenges.Count == 0)
+        {
+            return [];
+        }
+
+        var now = clock.GetUtcNow();
+        var players = await LoadPlayerRefs(db, ct);
+        var positions = await db.RankingSnapshot.AsNoTracking().ToDictionaryAsync(s => s.PlayerId, s => s.Position, ct);
+
+        return challenges.Select(c => new PublicChallengeDto(
+            c.Id, players[c.ChallengerId], players[c.ChallengedId],
+            positions.TryGetValue(c.ChallengerId, out var cp) ? cp : null,
+            positions.TryGetValue(c.ChallengedId, out var dp) ? dp : null,
+            c.IssuedAt, c.DeadlineAt, c.Status, c.IsExpired(now), c.ScheduledAt, c.MatchId)).ToList();
     }
 
     public static MatchDto ToMatchDto(Match m, IReadOnlyDictionary<int, PlayerRefDto> players) => new(
