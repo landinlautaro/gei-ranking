@@ -1,6 +1,6 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { challenge, mockApi, player, profile, renderApp } from '../test-utils'
+import { challenge, mockApi, player, profile, rankingRow, renderApp } from '../test-utils'
 
 const ana = player(1, 'Ana Gómez')
 const beto = player(2, 'Beto Ruiz')
@@ -99,6 +99,38 @@ describe('PlayerPage · desafíos abiertos', () => {
     expect(asChallenged).toHaveTextContent('Lo desafía')
     expect(asChallenged).toHaveTextContent('Caro Paz')
     expect(asChallenged).toHaveTextContent('Venció el dom 11/01')
+  })
+
+  it('en "a quiénes puede desafiar" deja en gris a quien ya tiene un desafío abierto', async () => {
+    mockApi({
+      ...routes([]),
+      '/api/players/1': profile(ana, { canChallenge: [rankingRow(3, caro), rankingRow(4, dani), rankingRow(5, player(5, 'Eli Sosa'))] }),
+      '/api/challenges': {
+        active: [challenge(1, caro, beto)],
+        expired: [challenge(2, player(9, 'Otro'), dani, EXPIRED)],
+        recentlyPlayed: [challenge(3, player(5, 'Eli Sosa'), beto, { status: 'Played', matchId: 4 })],
+      },
+    })
+    renderApp('/players/1')
+
+    const section = (await screen.findByRole('heading', { name: 'A quiénes puede desafiar hoy' })).closest('section')!
+    const [carolina, daniel, eli] = within(section).getAllByRole('link')
+    await waitFor(() => expect(carolina).toHaveTextContent('Ya tiene un desafío'))
+    expect(daniel).toHaveTextContent('Ya tiene un desafío') // vencido pero sin resolver: sigue ocupado
+    expect(eli).not.toHaveTextContent('Ya tiene un desafío') // ya jugó el suyo
+    expect(eli).not.toHaveClass('text-slate-600')
+  })
+
+  it('si no se puede traer el tablero, todos figuran disponibles', async () => {
+    mockApi({
+      ...routes([]),
+      '/api/players/1': profile(ana, { canChallenge: [rankingRow(3, caro)] }),
+      '/api/challenges': 500,
+    })
+    renderApp('/players/1')
+
+    const section = (await screen.findByRole('heading', { name: 'A quiénes puede desafiar hoy' })).closest('section')!
+    expect(within(section).getByRole('link')).not.toHaveTextContent('Ya tiene un desafío')
   })
 
   it('usa el singular con un solo desafío y no muestra nada si no hay', async () => {

@@ -28,10 +28,11 @@ export function usePlayer(id: number) {
   })
 }
 
-export function useChallenges() {
+export function useChallenges(enabled = true) {
   return useQuery({
     queryKey: ['challenges'],
     queryFn: ({ signal }) => getJson<ChallengeBoard>('/api/challenges', undefined, signal),
+    enabled,
   })
 }
 

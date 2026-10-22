@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
-import { useMatches, usePlayer } from '../api/queries'
+import { useChallenges, useMatches, usePlayer } from '../api/queries'
 import { Avatar } from '../components/Avatar'
 import { ChallengeCard } from '../components/ChallengeCard'
 import { MatchCard } from '../components/MatchCard'
@@ -30,6 +30,13 @@ export function PlayerPage() {
   const { data: player, isPending, isError, error, refetch } = usePlayer(id)
   const matches = useMatches({ playerId: id, pageSize: RECENT_MATCHES }, Number.isInteger(id) && id > 0)
   useDocumentTitle(player?.fullName)
+
+  // Purely visual: whoever is in an open challenge (on time or expired) shows greyed out in the list of who can be challenged.
+  // If the board cannot be loaded the list simply shows everyone as available.
+  const board = useChallenges(Number.isInteger(id) && id > 0).data
+  const playersWithOpenChallenge = new Set(
+    [...(board?.active ?? []), ...(board?.expired ?? [])].flatMap((c) => [c.challenger.id, c.challenged.id]),
+  )
 
   if (isPending && Number.isInteger(id) && id > 0) return <LoadingState label="Cargando perfil…" />
   if (isError || !player) {
@@ -125,18 +132,24 @@ export function PlayerPage() {
         <h2 id="challenge-title" className="text-lg font-semibold">A quiénes puede desafiar hoy</h2>
         {player.canChallenge.length > 0 ? (
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-            {player.canChallenge.map((c) => (
-              <li key={c.player.id}>
-                <Link
-                  to={`/players/${c.player.id}`}
-                  className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-2.5 shadow-sm hover:bg-slate-50"
-                >
-                  <span className="w-8 text-right font-bold tabular-nums">#{c.position}</span>
-                  <Avatar player={c.player} size="sm" />
-                  <span className="truncate">{c.player.fullName}</span>
-                </Link>
-              </li>
-            ))}
+            {player.canChallenge.map((c) => {
+              const busy = playersWithOpenChallenge.has(c.player.id)
+              return (
+                <li key={c.player.id}>
+                  <Link
+                    to={`/players/${c.player.id}`}
+                    className={`flex items-center gap-3 rounded-lg border p-2.5 shadow-sm hover:bg-slate-50 ${
+                      busy ? 'border-slate-200 bg-slate-100 text-slate-600' : 'border-slate-200 bg-white'
+                    }`}
+                  >
+                    <span className="w-8 text-right font-bold tabular-nums">#{c.position}</span>
+                    <Avatar player={c.player} size="sm" />
+                    <span className="truncate">{c.player.fullName}</span>
+                    {busy && <span className="ml-auto shrink-0 text-sm">Ya tiene un desafío</span>}
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         ) : (
           <p className="mt-3 text-slate-700">
