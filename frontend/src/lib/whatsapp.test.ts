@@ -63,6 +63,40 @@ describe('rankingMessage', () => {
     )
   })
 
+  it('suma los desafíos pendientes (con su coordinación) y los vencidos antes del link', () => {
+    const challenges = {
+      active: [
+        challenge(1, beto, ana, { challengerPosition: 8, challengedPosition: 5, deadlineAt: '2026-10-19T02:59:59.999Z' }),
+        challenge(2, ana, beto, { challengerPosition: 3, challengedPosition: 2, status: 'Scheduled', scheduledAt: '2026-10-15T22:00:00Z' }),
+      ],
+      expired: [challenge(3, beto, ana, { challengerPosition: 7, challengedPosition: 4, deadlineAt: '2026-10-12T02:59:59.999Z' })],
+    }
+
+    expect(rankingMessage({ ...base, matches: [], challenges })).toBe(
+      [
+        '🎾 *Ranking GEI* — 13/10/2026',
+        '',
+        '1. Ana Gómez',
+        '2. Beto Pérez',
+        '',
+        '*Desafíos pendientes*',
+        '• #8 Beto Pérez vs #5 Ana Gómez (vence el dom 18/10)',
+        '• #3 Ana Gómez vs #2 Beto Pérez (coordinado: jue 15/10 19:00)',
+        '',
+        '*Desafíos vencidos*',
+        '• #7 Beto Pérez vs #4 Ana Gómez (venció el dom 11/10)',
+        '',
+        'Ver todo: https://gei.example/',
+      ].join('\n'),
+    )
+  })
+
+  it('sin desafíos abiertos omite esas secciones', () => {
+    const text = rankingMessage({ ...base, matches: [], challenges: { active: [], expired: [] } })
+
+    expect(text).not.toContain('Desafíos')
+  })
+
   it('sin resultados omite esa sección', () => {
     const text = rankingMessage({ ...base, matches: [] })
 

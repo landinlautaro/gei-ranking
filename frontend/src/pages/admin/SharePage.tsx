@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useMatches, useRanking } from '../../api/queries'
+import { useChallenges, useMatches, useRanking } from '../../api/queries'
 import { CopyButton } from '../../components/CopyButton'
 import { ErrorState, LoadingState } from '../../components/PageState'
 import { Field, inputClass } from '../../components/ui'
@@ -26,8 +26,9 @@ export function SharePage() {
   // An emptied date input falls back to the default instead of silently listing everything.
   const effectiveSince = since || previousMonday()
   const matches = useMatches({ from: effectiveSince, pageSize: MAX_RESULTS }, true)
+  const challenges = useChallenges()
 
-  const ready = ranking.data && matches.data
+  const ready = ranking.data && matches.data && challenges.data
   const text = ready
     ? rankingMessage({
         rows: ranking.data,
@@ -35,13 +36,14 @@ export function SharePage() {
         publishedAt: new Date().toISOString(),
         since: `${effectiveSince}T12:00:00Z`,
         siteUrl: window.location.origin + '/',
+        challenges: challenges.data,
       })
     : ''
 
   return (
     <>
       <h1 className="mb-1 text-2xl font-bold">Publicar en WhatsApp</h1>
-      <p className="mb-4 text-slate-700">Armá el mensaje del lunes con el ranking y los resultados, copialo y pegalo en el grupo.</p>
+      <p className="mb-4 text-slate-700">Armá el mensaje del lunes con el ranking, los resultados y los desafíos, copialo y pegalo en el grupo.</p>
 
       <div className="max-w-xs">
         <Field label="Incluir resultados desde" hint="Por defecto, el lunes de la semana pasada.">
@@ -50,9 +52,10 @@ export function SharePage() {
       </div>
 
       <div className="mt-4">
-        {(ranking.isPending || matches.isPending) && <LoadingState label="Armando el mensaje…" />}
+        {(ranking.isPending || matches.isPending || challenges.isPending) && <LoadingState label="Armando el mensaje…" />}
         {ranking.isError && <ErrorState error={ranking.error} onRetry={() => void ranking.refetch()} />}
         {matches.isError && <ErrorState error={matches.error} onRetry={() => void matches.refetch()} />}
+        {challenges.isError && <ErrorState error={challenges.error} onRetry={() => void challenges.refetch()} />}
         {ready && (
           <div className="space-y-3">
             <pre

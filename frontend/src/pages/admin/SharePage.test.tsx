@@ -1,11 +1,12 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { loginAsAdmin, match, mockApi, player, rankingRow, renderApp } from '../../test-utils'
+import { challenge, loginAsAdmin, match, mockApi, player, rankingRow, renderApp } from '../../test-utils'
 import { previousMonday } from './SharePage'
 
 const ana = player(1, 'Ana Gómez')
 const beto = player(2, 'Beto Pérez')
+const noChallenges = { active: [], expired: [], recentlyPlayed: [] }
 
 describe('previousMonday', () => {
   it('es el lunes de la semana anterior, en hora del club', () => {
@@ -27,6 +28,7 @@ describe('Publicar en WhatsApp', () => {
     const { requests } = mockApi({
       '/api/ranking': [rankingRow(1, ana), rankingRow(2, beto)],
       '/api/matches': { items: [match(1, beto, ana, beto, { movementText: null })], total: 1, page: 1, pageSize: 100 },
+      '/api/challenges': noChallenges,
     })
     renderApp('/admin/share')
 
@@ -43,8 +45,35 @@ describe('Publicar en WhatsApp', () => {
     expect(await screen.findByText('¡Copiado!')).toBeInTheDocument()
   })
 
+  it('suma los desafíos pendientes y vencidos al mensaje', async () => {
+    mockApi({
+      '/api/ranking': [rankingRow(1, ana), rankingRow(2, beto)],
+      '/api/matches': { items: [], total: 0, page: 1, pageSize: 100 },
+      '/api/challenges': {
+        active: [challenge(1, beto, ana, { status: 'Scheduled', scheduledAt: '2099-01-08T22:00:00Z' })],
+        expired: [challenge(2, ana, beto, { challengerPosition: 3, challengedPosition: 2, deadlineAt: '2026-01-12T02:59:59.999Z', isExpired: true })],
+        recentlyPlayed: [],
+      },
+    })
+    renderApp('/admin/share')
+
+    const preview = await screen.findByLabelText('Vista previa del mensaje')
+    expect(preview).toHaveTextContent('*Desafíos pendientes*')
+    expect(preview).toHaveTextContent('• #8 Beto Pérez vs #5 Ana Gómez (coordinado: jue 08/01 19:00)')
+    expect(preview).toHaveTextContent('*Desafíos vencidos*')
+    expect(preview).toHaveTextContent('• #3 Ana Gómez vs #2 Beto Pérez (venció el dom 11/01)')
+  })
+
+  it('no arma el mensaje si no se pudieron traer los desafíos', async () => {
+    mockApi({ '/api/ranking': [], '/api/matches': { items: [], total: 0, page: 1, pageSize: 100 }, '/api/challenges': 500 })
+    renderApp('/admin/share')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('El servidor respondió con un error (500)')
+    expect(screen.queryByLabelText('Vista previa del mensaje')).not.toBeInTheDocument()
+  })
+
   it('el menú de administración incluye "Publicar"', async () => {
-    mockApi({ '/api/ranking': [], '/api/matches': { items: [], total: 0, page: 1, pageSize: 100 } })
+    mockApi({ '/api/ranking': [], '/api/matches': { items: [], total: 0, page: 1, pageSize: 100 }, '/api/challenges': noChallenges })
     renderApp('/admin/share')
 
     expect(await screen.findByRole('link', { name: 'Publicar' })).toHaveAttribute('href', '/admin/share')
