@@ -1,5 +1,6 @@
 using System.Text.Json;
 using GeiRanking.Domain.Admin;
+using GeiRanking.Domain.Challenges;
 using GeiRanking.Domain.Matches;
 using GeiRanking.Domain.Players;
 using GeiRanking.Infrastructure.Persistence;
@@ -17,6 +18,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Player> Players => Set<Player>();
 
     public DbSet<Match> Matches => Set<Match>();
+
+    public DbSet<Challenge> Challenges => Set<Challenge>();
 
     public DbSet<StoredRankingEvent> RankingEvents => Set<StoredRankingEvent>();
 
@@ -77,6 +80,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(m => m.ChallengerId);
             e.HasIndex(m => m.ChallengedId);
             e.HasIndex(m => m.PlayedAt);
+        });
+
+        modelBuilder.Entity<Challenge>(e =>
+        {
+            e.ToTable("challenges", t =>
+            {
+                t.HasCheckConstraint("ck_challenges_distinct_players", "challenger_id <> challenged_id");
+                t.HasCheckConstraint("ck_challenges_played_has_match", "status <> 'Played' OR match_id IS NOT NULL");
+            });
+
+            e.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
+            e.Property(c => c.Notes).HasMaxLength(1000);
+
+            e.HasOne<Player>().WithMany().HasForeignKey(c => c.ChallengerId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Player>().WithMany().HasForeignKey(c => c.ChallengedId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Match>().WithMany().HasForeignKey(c => c.MatchId).OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(c => new { c.Status, c.DeadlineAt });
+            e.HasIndex(c => c.ChallengerId);
+            e.HasIndex(c => c.ChallengedId);
+            e.HasIndex(c => c.MatchId).IsUnique();
         });
 
         modelBuilder.Entity<StoredRankingEvent>(e =>

@@ -57,6 +57,82 @@ namespace GeiRanking.Infrastructure.Migrations
                     b.ToTable("admin_users", (string)null);
                 });
 
+            modelBuilder.Entity("GeiRanking.Domain.Challenges.Challenge", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChallengedId")
+                        .HasColumnType("integer")
+                        .HasColumnName("challenged_id");
+
+                    b.Property<int>("ChallengerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("challenger_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("DeadlineAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deadline_at");
+
+                    b.Property<DateTimeOffset>("IssuedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("issued_at");
+
+                    b.Property<int?>("MatchId")
+                        .HasColumnType("integer")
+                        .HasColumnName("match_id");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("notes");
+
+                    b.Property<DateTimeOffset?>("ScheduledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("scheduled_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_challenges");
+
+                    b.HasIndex("ChallengedId")
+                        .HasDatabaseName("ix_challenges_challenged_id");
+
+                    b.HasIndex("ChallengerId")
+                        .HasDatabaseName("ix_challenges_challenger_id");
+
+                    b.HasIndex("MatchId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_challenges_match_id");
+
+                    b.HasIndex("Status", "DeadlineAt")
+                        .HasDatabaseName("ix_challenges_status_deadline_at");
+
+                    b.ToTable("challenges", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_challenges_distinct_players", "challenger_id <> challenged_id");
+
+                            t.HasCheckConstraint("ck_challenges_played_has_match", "status <> 'Played' OR match_id IS NOT NULL");
+                        });
+                });
+
             modelBuilder.Entity("GeiRanking.Domain.Matches.Match", b =>
                 {
                     b.Property<int>("Id")
@@ -329,6 +405,29 @@ namespace GeiRanking.Infrastructure.Migrations
                         .HasDatabaseName("ix_ranking_events_occurred_at_created_at_id");
 
                     b.ToTable("ranking_events", (string)null);
+                });
+
+            modelBuilder.Entity("GeiRanking.Domain.Challenges.Challenge", b =>
+                {
+                    b.HasOne("GeiRanking.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("ChallengedId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_challenges_players_challenged_id");
+
+                    b.HasOne("GeiRanking.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("ChallengerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_challenges_players_challenger_id");
+
+                    b.HasOne("GeiRanking.Domain.Matches.Match", null)
+                        .WithMany()
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_challenges_matches_match_id");
                 });
 
             modelBuilder.Entity("GeiRanking.Domain.Matches.Match", b =>
